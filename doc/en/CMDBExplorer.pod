@@ -1,6 +1,6 @@
 =head1 NAME
 
-ITSMTrace - trace links between services and config items
+CMDBExplorer - trace links between services and config items
 
 
 =head1 SYNOPSIS
@@ -13,7 +13,7 @@ by links that carry a certain semantic in their name (link type).
 A set of useful link types is provided with ITSM, e.g.
 C<DependsOn> to indicate that a given service or config item (CI) depends 
 on another CI. The zoom view of OTRS allows to see links going to/from a
-service or CI at that level, but not beyond. B<ITSMTrace> can show I<all> 
+service or CI at that level, but not beyond. B<CMDBExplorer> can show I<all> 
 links in and out of the current service/CI and follow them recursively within
 settable constraints (specific link types, specific CI types, recursion 
 depth, incident state, etc.). 
@@ -30,13 +30,13 @@ through a command-line interface.
 
 This section explains the basic concept behind the provided capabilities
 and some of the assumptions on which they rely. 
-Please see the perldoc of C<Kernel::System::ITSMTrace> for details about
+Please see the perldoc of C<Kernel::System::CMDBExplorer> for details about
 option names and accepted values. 
 
 
 =head2 Data Model
 
-In the context for which B<ITSMTrace> has initially been developed, there
+In the context for which B<CMDBExplorer> has initially been developed, there
 is the need to model technical IT infrastructure with lots of applications.
 A "service" as exposed in OTRS typically has one or more associated CIs
 of type C<Technical Service> on which it depends. 
@@ -48,7 +48,7 @@ and extent of modeling is up to the user of this software.
 
 Example:
 
- % bin/otrs.ITSMTrace.pl -CompactTrace -ServiceID 222
+ % bin/otrs.CMDBExplorer.pl -CompactTrace -ServiceID 222
  OTRS [Service#222]
   ->  <<DependsOn>>  OTRS for IS/IT [ITSMConfigItem::TechnicalService#103]
     ->  <<DependsOn>>  ITSM 3.0.4 [ITSMConfigItem::Software#99]
@@ -62,7 +62,7 @@ Example:
 
 =head2 Object- and Link-Types
 
-B<ITSMTrace> wraps services and CIs as "objects" with a common interface, 
+B<CMDBExplorer> wraps services and CIs as "objects" with a common interface, 
 their object types being C<Service>, C<ITSMConfigItem> and all CI subclasses,
 e.g. C<ITSMConfigItem::Computer>. These object types can be used to restrict
 the objects that are candidates to be shown on a trace.
@@ -71,7 +71,7 @@ Recognized link types are those configured into OTRS+ITSM (C<DependsOn>,
 C<AlternativeTo>, etc.) In addition, the pseudo link type C<ComposedOf> 
 is introduced to model the hierarchical decomposition of service objects.
 For directed links, only the "raw" link name (the "forward" direction) 
-is used, i.e. B<ITSMTrace> only knows about C<DependsOn> but not about 
+is used, i.e. B<CMDBExplorer> only knows about C<DependsOn> but not about 
 its reverse display name C<RequiredBy>. Directed links are currently 
 all assumed to point "down" in some underlying hierarchy of things.
 Using a type of directed link that points "up" might work, but is 
@@ -110,7 +110,7 @@ the trace would stop after the cluster for the MySQL service.
 
 =head2 Web User Interface
 
-B<ITSMTrace> is integrated with the web UI of OTRS in the areas
+B<CMDBExplorer> is integrated with the web UI of OTRS in the areas
 "Service" and "CMDB". By default, there is one link to show a
 trace of all objects of the given type. This trace tends to
 become unreadable even with a moderate number of objects.
@@ -126,7 +126,7 @@ operational.
 =head2 Command Line Interface
 
 For full access to all capabilities of generating a trace, 
-B<ITSMTrace> also supplies a low-level command line interface 
+B<CMDBExplorer> also supplies a low-level command line interface 
 in the C<bin> directory. Output goes to the standard output.
 
 
@@ -179,7 +179,7 @@ Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
 
-For license information, see the enclosed file COPYING-ITSMTrace
+For license information, see the enclosed file COPYING-CMDBExplorer
 (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.
@@ -193,9 +193,9 @@ dietmar.berg@thalesgroup.com
 
 ########################################################################
 # PDF Production (atviesu0005):
-pod2man ITSMTrace.pod > ITSMTrace.man; \
-groff -man ITSMTrace.man > ITSMTrace.ps; \
+pod2man CMDBExplorer.pod > CMDBExplorer.man; \
+groff -man CMDBExplorer.man > CMDBExplorer.ps; \
 gs -dCompatibilityLevel=2 -dNOPAUSE -dBATCH \
  -dAutoRotatePages=/None -sDEVICE=pdfwrite \
- -sOutputFile=ITSMTrace.pdf ITSMTrace.ps 
+ -sOutputFile=CMDBExplorer.pdf CMDBExplorer.ps 
 ########################################################################
