@@ -1,28 +1,28 @@
 # --
-# Kernel/System/ITSMTrace.pm - traces links between objects
+# Kernel/System/CMDBExplorer.pm - traces links between objects
 # Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 # --
-# $Id: ITSMTrace.pm $
+# $Id: CMDBExplorer.pm $
 # --
 # This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
-# For license information, see the enclosed file COPYING-ITSMTrace
+# For license information, see the enclosed file COPYING-CMDBExplorer
 # (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 # If you did not receive this file, see 
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 # --
 
-package Kernel::System::ITSMTrace;
+package Kernel::System::CMDBExplorer;
 
 =head1 NAME
 
-Kernel::System::ITSMTrace - trace links between services, config items or FAQs
+Kernel::System::CMDBExplorer - trace links between services, config items or FAQs
 
 =head1 SYNOPSIS
 
 This class abstracts a set of ITSM services, config items, FAQs and the links
 between them as a "trace" that can be rendered textually (built-in) or 
-graphically by C<Kernel::System::ITSMTrace::GraphVizRenderer>, using the
+graphically by C<Kernel::System::CMDBExplorer::GraphVizRenderer>, using the
 free graphviz library.
 
 Its purpose is to support visualization of service dependencies either 
@@ -41,10 +41,10 @@ use Kernel::System::ITSMConfigItem;
 use Kernel::System::LinkObject;
 use Kernel::System::GeneralCatalog;
 
-use Kernel::System::ITSMTrace::ObjectWrapper;
-use Kernel::System::ITSMTrace::Scope;
-use Kernel::System::ITSMTrace::GraphVizRenderer;
-use Kernel::System::ITSMTrace::FlatFileObjectRenderer;
+use Kernel::System::CMDBExplorer::ObjectWrapper;
+use Kernel::System::CMDBExplorer::Scope;
+use Kernel::System::CMDBExplorer::GraphVizRenderer;
+use Kernel::System::CMDBExplorer::FlatFileObjectRenderer;
 
 
 =head1 PUBLIC INTERFACE
@@ -83,7 +83,7 @@ Creates an object.
     $CommonObjects{LinkObject}    = Kernel::System::LinkObject->new(%CommonObjects);
     $CommonObjects{ServiceObject} = Kernel::System::Service->new(%CommonObjects);
     
-    my $ITSMTraceObject = Kernel::System::ITSMTrace->new(
+    my $CMDBExplorerObject = Kernel::System::CMDBExplorer->new(
         %CommonObjects,
  	Debug => 0,	# optional, { 0 | 1 }
     );
@@ -110,7 +110,7 @@ sub new {
     }
 
     # Get debug setting through config, overriden by parameter
-    $Self->{Debug} = $Self->{ConfigObject}->{'ITSMTrace::Debug'} || 0;
+    $Self->{Debug} = $Self->{ConfigObject}->{'CMDBExplorer::Debug'} || 0;
     $Self->{Debug} = $Param{Debug} if defined $Param{Debug};
 
     return $Self;
@@ -469,7 +469,7 @@ sub Trace
     } #if
 
     # Init
-    Kernel::System::ITSMTrace::ObjectWrapper->Init();	# clear cache
+    Kernel::System::CMDBExplorer::ObjectWrapper->Init();	# clear cache
     $Self->GetKnownLinkTypes;	# preload private link type lookup table
     $Self->_preloadScopes if $Self->{EnableClustering};
 
@@ -503,7 +503,7 @@ sub Trace
 	return $Self->_renderAsText(\@TraceSteps);
     } #if
     elsif ( $OutputFormat eq 'flat' ) {
-	my $Renderer = Kernel::System::ITSMTrace::FlatFileObjectRenderer->new(
+	my $Renderer = Kernel::System::CMDBExplorer::FlatFileObjectRenderer->new(
 		Debug => $Self->{Debug} 
 	);
 	return $Renderer->Render(
@@ -513,7 +513,7 @@ sub Trace
     }
     else {
 	# All other formats are provided by the external GraphViz renderer
-	my $Renderer = Kernel::System::ITSMTrace::GraphVizRenderer->new(
+	my $Renderer = Kernel::System::CMDBExplorer::GraphVizRenderer->new(
 		Debug => $Self->{Debug} 
 	);
 	return $Renderer->Render(
@@ -744,7 +744,7 @@ sub _preloadScopes {
     # their referencing services
     my @CIs;
     for my $CI ( @{$Self->_expandConfigItemID(0) } ) {
-	my $ScopeObject = Kernel::System::ITSMTrace::Scope->new();
+	my $ScopeObject = Kernel::System::CMDBExplorer::Scope->new();
 	$Self->{Object2Scope}->{$CI} = $ScopeObject;
 	my $LinkList = $CI->GetLinkList;
 	if ( exists $LinkList->{Service} ) {
@@ -754,7 +754,7 @@ sub _preloadScopes {
 		next if $Self->{KnownLinkTypes}->{$LinkType} eq '='; # not directed
 		next unless $Self->_isLinkTypeAllowed( $LinkType );  # not used
 		for my $SourceID ( keys %{$LinkList->{Service}->{$LinkType}->{Source}} ) {
-		    my $Service = Kernel::System::ITSMTrace::ObjectWrapper->new(
+		    my $Service = Kernel::System::CMDBExplorer::ObjectWrapper->new(
 			%{$Self->_GetCommonObjects}, 
 			Type => 'Service',
 			ID => $SourceID,
@@ -763,7 +763,7 @@ sub _preloadScopes {
 		    $ScopeObject->AddExplicitScopeID( ID => $SourceID );
 		    # Give the service the same explicit scope as the referenced CI
 		    my $SourceScopeObject =    $Self->{Object2Scope}->{$Service}
-					    || Kernel::System::ITSMTrace::Scope->new();
+					    || Kernel::System::CMDBExplorer::Scope->new();
 		    $Self->{Object2Scope}->{$Service} = $SourceScopeObject;
 		    $SourceScopeObject->AddExplicitScopeID( ID => $SourceID );
 		} #for
@@ -785,14 +785,14 @@ sub _preloadScopes {
 	    next unless $Self->_isLinkTypeAllowed( $LinkType );  # filtered away
 	    # Let each target CI inherit the scope IDs from the linking CI
 	    for my $TargetID ( keys %{$LinkList->{ITSMConfigItem}->{$LinkType}->{Target}} ) {
-		my $TargetCI = Kernel::System::ITSMTrace::ObjectWrapper->new(
+		my $TargetCI = Kernel::System::CMDBExplorer::ObjectWrapper->new(
 		    %{$Self->_GetCommonObjects}, 
 		    Type => 'ITSMConfigItem',
 		    ID => $TargetID
 		);
 		next unless $TargetCI->IsValid || $Self->{IncludeInvalidObjects};
 		my $TargetScopeObject =    $Self->{Object2Scope}->{$TargetCI}
-				        || Kernel::System::ITSMTrace::Scope->new();
+				        || Kernel::System::CMDBExplorer::Scope->new();
 		$Self->{Object2Scope}->{$TargetCI} = $TargetScopeObject;
 		my $Added = $TargetScopeObject->InheritScope( Scope => $ScopeObject );
 		push @CIs, $TargetCI if $Added;	# save for (re-)processing
@@ -851,7 +851,7 @@ sub _expandServiceID {
     my @Objects;
     if ($ServiceID > 0) {
 	# Single service, try to load it
-	my $Object = Kernel::System::ITSMTrace::ObjectWrapper->new(
+	my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
 	    %{$Self->_GetCommonObjects}, 
 	    Type => 'Service', 
 	    ID => $Self->{ServiceID}
@@ -864,7 +864,7 @@ sub _expandServiceID {
 	    UserID => 1,
 	);
 	for my $ID ( keys %ServiceList ) {
-	    my $Object = Kernel::System::ITSMTrace::ObjectWrapper->new(
+	    my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
 		%{$Self->_GetCommonObjects}, 
 		Type => 'Service', 
 		ID => $ID,
@@ -890,7 +890,7 @@ sub _expandConfigItemID {
     my @Objects = ( );
     if ($ConfigItemID != 0) {
 	# Single config item, try to load it
-	my $Object = Kernel::System::ITSMTrace::ObjectWrapper->new(
+	my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
 	    %{$Self->_GetCommonObjects}, 
 	    Type => 'ITSMConfigItem', 
 	    ID => $Self->{ConfigItemID},
@@ -901,7 +901,7 @@ sub _expandConfigItemID {
 	my $ConfigItemList = $Self->{ConfigItemObject}->ConfigItemSearch();
 	my $IncludeInvalidObjects = $Self->{IncludeInvalidObjects};
 	for my $ID ( @{$ConfigItemList} ) {
-	    my $Object = Kernel::System::ITSMTrace::ObjectWrapper->new(
+	    my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
 		%{$Self->_GetCommonObjects}, 
 		Type => 'ITSMConfigItem', 
 		ID => $ID,
@@ -977,7 +977,7 @@ Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
 
-For license information, see the enclosed file COPYING-ITSMTrace
+For license information, see the enclosed file COPYING-CMDBExplorer
 (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.

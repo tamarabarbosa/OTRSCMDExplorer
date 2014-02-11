@@ -5,7 +5,7 @@
 # $Id: ITSMConfigItemMenuTrace.pm $
 # --
 # This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
-# For license information, see the enclosed file COPYING-ITSMTrace
+# For license information, see the enclosed file COPYING-CMDBExplorer
 # (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 # If you did not receive this file, see 
 # http://www.gnu.org/licenses/agpl-3.0.html.

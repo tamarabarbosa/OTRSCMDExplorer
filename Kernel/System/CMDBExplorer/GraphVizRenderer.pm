@@ -1,22 +1,22 @@
 # --
-# Kernel/System/ITSMTrace/GraphVizRenderer.pm - render trace through graphviz library
+# Kernel/System/CMDBExplorer/GraphVizRenderer.pm - render trace through graphviz library
 # Copyright (C) 2011 Thales Austria GmbH, http://www.thalesgroup.com/
 # --
-# $Id: ITSMTrace.pm $
+# $Id: CMDBExplorer.pm $
 # --
 # This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
-# For license information, see the enclosed file COPYING-ITSMTrace
+# For license information, see the enclosed file COPYING-CMDBExplorer
 # (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 # If you did not receive this file, see 
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 # --
 
-package Kernel::System::ITSMTrace::GraphVizRenderer;
+package Kernel::System::CMDBExplorer::GraphVizRenderer;
 
 =head1 NAME
 
-Kernel::System::ITSMTrace::GraphVizRenderer - render trace through graphviz library
+Kernel::System::CMDBExplorer::GraphVizRenderer - render trace through graphviz library
 
 
 =head1 SYNOPSIS
@@ -38,7 +38,7 @@ use Kernel::System::ITSMConfigItem;
 use Kernel::System::LinkObject;
 use Kernel::System::GeneralCatalog;
 
-use Kernel::System::ITSMTrace::ObjectWrapper;
+use Kernel::System::CMDBExplorer::ObjectWrapper;
 
 use GraphViz;
 
@@ -112,7 +112,7 @@ our %ClusterAttrs =
 
 Creates an object
 
-    my $GraphVizRenderer = Kernel::System::ITSMTrace::GraphVizRenderer->new();
+    my $GraphVizRenderer = Kernel::System::CMDBExplorer::GraphVizRenderer->new();
 
 =cut
 
@@ -155,7 +155,7 @@ the built-in mapping from objects & links to graphical elements.
 	...
     ];
 
-    # Object-to-scope mapping (see Kernel::System::ITSMTrace::Scope)
+    # Object-to-scope mapping (see Kernel::System::CMDBExplorer::Scope)
     $Object2Scope = { $Object => $Scope, ... }
 
     my $Output = $GraphVizRenderer->Render(
@@ -346,7 +346,7 @@ Copyright (C) 2011 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
 
-For license information, see the enclosed file COPYING-ITSMTrace
+For license information, see the enclosed file COPYING-CMDBExplorer
 (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.

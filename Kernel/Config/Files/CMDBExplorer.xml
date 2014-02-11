@@ -63,8 +63,8 @@
                 <Item Key="Name">Trace</Item>
                 <Item Key="Target">PopUp</Item>
                 <Item Key="Description">Trace links to/from config items or services</Item>
-                <Item Key="Action">AgentITSMTrace</Item>
-                <Item Key="Link">Action=AgentITSMTrace;ConfigItemID=$QData{"ConfigItemID"};EnableClustering=1;CompactTrace=1</Item>
+                <Item Key="Action">AgentCMDBExplorer</Item>
+                <Item Key="Link">Action=AgentCMDBExplorer;ConfigItemID=$QData{"ConfigItemID"};EnableClustering=1;CompactTrace=1</Item>
             </Hash>
         </Setting>
     </ConfigItem>

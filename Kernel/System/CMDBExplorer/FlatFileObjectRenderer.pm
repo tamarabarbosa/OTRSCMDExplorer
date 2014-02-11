@@ -1,22 +1,22 @@
 # --
-# Kernel/System/ITSMTrace/FlatFileObjectRenderer.pm - render CIs in flat file format
+# Kernel/System/CMDBExplorer/FlatFileObjectRenderer.pm - render CIs in flat file format
 # Copyright (C) 2012-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 # --
-# $Id: ITSMTrace.pm $
+# $Id: CMDBExplorer.pm $
 # --
 # This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
-# For license information, see the enclosed file COPYING-ITSMTrace
+# For license information, see the enclosed file COPYING-CMDBExplorer
 # (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 # If you did not receive this file, see 
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 # --
 
-package Kernel::System::ITSMTrace::FlatFileObjectRenderer;
+package Kernel::System::CMDBExplorer::FlatFileObjectRenderer;
 
 =head1 NAME
 
-Kernel::System::ITSMTrace::FlatFileObjectRenderer - dump objects in tabular format
+Kernel::System::CMDBExplorer::FlatFileObjectRenderer - dump objects in tabular format
 
 
 =head1 SYNOPSIS
@@ -41,7 +41,7 @@ use Kernel::System::LinkObject;
 use Kernel::System::GeneralCatalog;
 use Kernel::System::CustomerUser;
 
-use Kernel::System::ITSMTrace::ObjectWrapper;
+use Kernel::System::CMDBExplorer::ObjectWrapper;
 
 
 ########################################################################
@@ -63,7 +63,7 @@ use Kernel::System::ITSMTrace::ObjectWrapper;
 
 Creates an object
 
-    my $FlatFileObjectRenderer = Kernel::System::ITSMTrace::FlatFileObjectRenderer->new();
+    my $FlatFileObjectRenderer = Kernel::System::CMDBExplorer::FlatFileObjectRenderer->new();
 
 =cut
 
@@ -105,7 +105,7 @@ Dumps the objects in the graph given by C<$TraceSteps>.
 	...
     ];
 
-    # Object-to-scope mapping (see Kernel::System::ITSMTrace::Scope)
+    # Object-to-scope mapping (see Kernel::System::CMDBExplorer::Scope)
     $Object2Scope = { $Object => $Scope, ... }
 
     my $Output = $FlatFileObjectRenderer->Render(
@@ -387,7 +387,7 @@ Copyright (C) 2012-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
 
-For license information, see the enclosed file COPYING-ITSMTrace
+For license information, see the enclosed file COPYING-CMDBExplorer
 (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.

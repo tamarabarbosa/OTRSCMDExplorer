@@ -1,18 +1,18 @@
 # --
-# Kernel/Modules/AgentITSMTrace.pm - the OTRS::ITSM Trace module
+# Kernel/Modules/AgentCMDBExplorer.pm - the OTRS::ITSM Trace module
 # Copyright (C) 2011 Thales Austria GmbH, http://www.thalesgroup.com/
 # --
-# $Id: AgentITSMTrace.pm $
+# $Id: AgentCMDBExplorer.pm $
 # --
 # This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
-# For license information, see the enclosed file COPYING-ITSMTrace
+# For license information, see the enclosed file COPYING-CMDBExplorer
 # (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 # If you did not receive this file, see 
 # http://www.gnu.org/licenses/agpl-3.0.html.
 # --
 
 
-package Kernel::Modules::AgentITSMTrace;
+package Kernel::Modules::AgentCMDBExplorer;
 
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ use Kernel::System::Service;
 use Kernel::System::ITSMConfigItem;
 use Kernel::System::LinkObject;
 
-use Kernel::System::ITSMTrace;
+use Kernel::System::CMDBExplorer;
 
 use vars qw($VERSION);
 $VERSION = 0.8;
@@ -29,13 +29,13 @@ $VERSION = 0.8;
 
 =head1 NAME
 
-Kernel::Modules::AgentITSMService - URL interface for tracing links
+Kernel::Modules::AgentCMDBExplorer - URL interface for tracing links
 =cut
 
 
 =head1 SYNOPSIS
 
-This module translates the URL into calls to C<Kernel::System::ITSMTrace>
+This module translates the URL into calls to C<Kernel::System::CMDBExplorer>
 to generate a HTML page (currently a single PNG image). 
 
 
@@ -49,12 +49,12 @@ config item zoom pages, configurable through SysConfig in the
 module registration for this module.
 
 For a detailed description of parameters and their possible values 
-see C<Kernel::System::ITSMTrace>. Note that the URL can be controlled 
+see C<Kernel::System::CMDBExplorer>. Note that the URL can be controlled 
 through SysConfig, so it is possible to override the built-in defaults.
 
 =over 4
 
-  http://otrs-server/otrs/index.pl?Action=AgentITSMTrace;
+  http://otrs-server/otrs/index.pl?Action=AgentCMDBExplorer;
 
     ServiceID=<uint>;			(passed from calling module)
     ConfigItemID=<uint>;                (passed from calling module)
@@ -135,7 +135,7 @@ sub Run {
     $CommonObject{ConfigItemObject} =
     		Kernel::System::ITSMConfigItem->new(%CommonObject);
 
-    my $Tracer = Kernel::System::ITSMTrace->new(%CommonObject, Debug => 1);
+    my $Tracer = Kernel::System::CMDBExplorer->new(%CommonObject, Debug => 1);
 
     # Get constraints from URL, pass them on
     my %ConstraintParams;
@@ -193,7 +193,7 @@ Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
 
-For license information, see the enclosed file COPYING-ITSMTrace
+For license information, see the enclosed file COPYING-CMDBExplorer
 (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.

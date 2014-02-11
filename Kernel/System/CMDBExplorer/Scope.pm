@@ -1,21 +1,21 @@
 # --
-# Kernel/System/ITSMTrace/Scope.pm
+# Kernel/System/CMDBExplorer/Scope.pm
 # Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 # --
 # $Id: Scope.pm $
 # --
 # This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
-# For license information, see the enclosed file COPYING-ITSMTrace
+# For license information, see the enclosed file COPYING-CMDBExplorer
 # (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 # If you did not receive this file, see 
 # http://www.gnu.org/licenses/agpl-3.0.html.
 # --
 
-package Kernel::System::ITSMTrace::Scope;
+package Kernel::System::CMDBExplorer::Scope;
 
 =head1 NAME
 
-Kernel::System::ITSMTrace::Scope - object to track for which services an ITSMConfigItem is used
+Kernel::System::CMDBExplorer::Scope - object to track for which services an ITSMConfigItem is used
 
 =head1 SYNOPSIS
 
@@ -45,7 +45,7 @@ $VERSION = '0.8';
 
 =item new()
 
-    $ScopeObject = Kernel::System::ITSMTrace::Scope->new();
+    $ScopeObject = Kernel::System::CMDBExplorer::Scope->new();
 
 =cut
 
@@ -202,7 +202,7 @@ Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
 
-For license information, see the enclosed file COPYING-ITSMTrace
+For license information, see the enclosed file COPYING-CMDBExplorer
 (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.

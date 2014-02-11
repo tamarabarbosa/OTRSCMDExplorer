@@ -1,21 +1,21 @@
 # --
-# Kernel/System/ITSMTrace/ObjectWrapper.pm - wrap ITSM objects
+# Kernel/System/CMDBExplorer/ObjectWrapper.pm - wrap ITSM objects
 # Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 # --
 # $Id: ObjectWrapper.pm $
 # --
 # This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
-# For license information, see the enclosed file COPYING-ITSMTrace
+# For license information, see the enclosed file COPYING-CMDBExplorer
 # (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 # If you did not receive this file, see 
 # http://www.gnu.org/licenses/agpl-3.0.html.
 # --
 
-package Kernel::System::ITSMTrace::ObjectWrapper;
+package Kernel::System::CMDBExplorer::ObjectWrapper;
 
 =head1 NAME
 
-Kernel::System::ITSMTrace::ObjectWrapper - render trace through graphviz library
+Kernel::System::CMDBExplorer::ObjectWrapper - render trace through graphviz library
 
 =head1 SYNOPSIS
 
@@ -73,7 +73,7 @@ my @_COMMON_OBJECTS = ( qw( ConfigObject LogObject MainObject
 ###  S t a t i c   M e t h o d s  ######################################
 #
 
-=item Kernel::System::ITSMTrace::ObjectWrapper::Init()
+=item Kernel::System::CMDBExplorer::ObjectWrapper::Init()
 
 Static method to initialize the cache built into the class.
 
@@ -86,7 +86,7 @@ sub Init
 }
 
 
-=item Kernel::System::ITSMTrace::ObjectWrapper::GetAllInstances()
+=item Kernel::System::CMDBExplorer::ObjectWrapper::GetAllInstances()
 
 Static method that returns all instances as HASHref, with keys
 I<ObjectType>#I<ID>.
@@ -134,7 +134,7 @@ type/ID combination.
     $CommonObjects{LinkObject}    = Kernel::System::LinkObject->new(%CommonObjects);
     $CommonObjects{ServiceObject} = Kernel::System::Service->new(%CommonObjects);
     
-    my $WrapperObject = Kernel::System::ITSMTrace::ObjectWrapper->new(
+    my $WrapperObject = Kernel::System::CMDBExplorer::ObjectWrapper->new(
 	%CommonObjects,
  	Debug => 0,		# optional, { 0 | 1 }
 	Type => $String		# { Service | ITSMConfigItem | FAQ }
@@ -221,7 +221,7 @@ sub new
 ########################################################################
 #
 # Private method to load an ITSM Service into a 
-# Kernel::System::ITSMTrace::ObjectWrapper
+# Kernel::System::CMDBExplorer::ObjectWrapper
 #
 #     $ObjectWrapper->_loadService( $ID );
 #
@@ -258,7 +258,7 @@ sub _loadService
 
 
 
-# Load an ITSMConfigItem into a Kernel::System::ITSMTrace::ObjectWrapper
+# Load an ITSMConfigItem into a Kernel::System::CMDBExplorer::ObjectWrapper
 sub _loadITSMConfigItem
 {
     my ($Self, $ID) = @_;
@@ -581,7 +581,7 @@ Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
 
-For license information, see the enclosed file COPYING-ITSMTrace
+For license information, see the enclosed file COPYING-CMDBExplorer
 (GNU AFFERO GENERAL PUBLIC LICENSE, version 3). 
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.
