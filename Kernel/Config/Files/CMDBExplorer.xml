@@ -1,71 +1,137 @@
 <?xml version="1.0" encoding="iso-8859-1" ?>
 <otrs_config version="1.0" init="Config">
-    <ConfigItem Name="Frontend::Module###AgentCMDBExplorer" Required="0" Valid="1">
-        <Description Translatable="1">Frontend module registration for the agent interface.</Description>
-        <Group>ITSM Configuration Management</Group>
-        <SubGroup>Frontend::Agent::ModuleRegistration</SubGroup>
+    <ConfigItem Name="CMDBExplorer::GraphOptions###LinkFontSize" Required="1" Valid="1">
+        <Description Translatable="1">Font size for the link labels (if displayed)</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
         <Setting>
-            <FrontendModuleReg>
-                <GroupRo>itsm-configitem</GroupRo>
-                <GroupRo>itsm-service</GroupRo>
-                <Description>Tracing of Links</Description>
-                <Title>Trace</Title>
-                <NavBarName>Config Item</NavBarName>
-                <NavBar>
-                    <Description>Graphical Trace of Dependencies to Config Items</Description>
-                    <Name>Trace</Name>
-                    <Link>Action=AgentCMDBExplorer;ServiceID=0;OutputOptions=rotate</Link>
-                    <Type></Type>
-                    <Block></Block>
-                    <NavBar>Service</NavBar>
-                    <AccessKey></AccessKey>
-                    <Prio>150</Prio>
-                </NavBar>
-                <NavBar>
-                    <Description>Graphical Trace of Dependencies between Config Items and Services</Description>
-                    <Name>Trace</Name>
-                    <Link>Action=AgentCMDBExplorer;ConfigItemID=0;OutputOptions=rotate</Link>
-                    <Type></Type>
-                    <Block></Block>
-                    <NavBar>Config Item</NavBar>
-                    <AccessKey></AccessKey>
-                    <Prio>150</Prio>
-                </NavBar>
-            </FrontendModuleReg>
+            <String Regex="^[0-9]{1,2}$">6</String>
         </Setting>
     </ConfigItem>
 
-    <ConfigItem Name="ITSMService::Frontend::MenuModule###550-Trace" Required="0" Valid="1">
-        <Description Translatable="1">Shows a link in the menu that allows tracing links from 
-		     a service to config items in the service zoom view of the agent interface.</Description>
-        <Group>ITSM Service </Group>
-        <SubGroup>Frontend::Agent::ITSMService::MenuModule</SubGroup>
+    <ConfigItem Name="CMDBExplorer::GraphOptions###NodeFontSize" Required="1" Valid="1">
+        <Description Translatable="1">Font size for the node labels</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <String Regex="^[0-9]{1,2}$">6</String>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###DisplayLinksName" Required="1" Valid="1">
+        <Description Translatable="1">Whether links name should be displayed in the CMDB explorer graph or not</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Option SelectedID="0">
+                <Item Key="0">No</Item>
+                <Item Key="1">Yes</Item>
+            </Option>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###NodeShapes" Required="1" Valid="1">
+        <Description Translatable="1">Defines the shapes (eg: box, ellipse, none) that will be user for rendering nodes in the explorer graph. Value
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
         <Setting>
             <Hash>
-                <Item Key="Module">Kernel::Output::HTML::ITSMServiceMenuTrace</Item>
-                <Item Key="Name">Trace</Item>
-                <Item Key="Target">PopUp</Item>
-                <Item Key="Description">Trace links to config items</Item>
-                <Item Key="Action">AgentITSMTrace</Item>
-                <Item Key="Link">Action=AgentCMDBExplorer;ServiceID=$QData{"ServiceID"};EnableClustering=0;CompactTrace=1</Item>
+                <Item Key="Service">box3d</Item>
+                <Item Key="ITSMConfigItem::Computer">box</Item>
+                <Item Key="ITSMConfigItem::Location">house</Item>
             </Hash>
         </Setting>
     </ConfigItem>
 
-    <ConfigItem Name="ITSMConfigItem::Frontend::MenuModule###550-Trace" Required="0" Valid="1">
-        <Description Translatable="1">Shows a link in the menu that allows tracing the links from/to 
-		     a config item or service in the config item zoom view of the agent interface.</Description>
-        <Group>ITSM Configuration Management</Group>
-        <SubGroup>Frontend::Agent::ITSMConfigItem::MenuModule</SubGroup>
+    <ConfigItem Name="CMDBExplorer::GraphOptions###LinkStyles" Required="1" Valid="1">
+        <Description Translatable="1">Defines the styles (eg: filled, dotted) that will be user for rendering links in the explorer graph. Values mu
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
         <Setting>
             <Hash>
-                <Item Key="Module">Kernel::Output::HTML::ITSMConfigItemMenuTrace</Item>
-                <Item Key="Name">Trace</Item>
-                <Item Key="Target">PopUp</Item>
-                <Item Key="Description">Trace links to/from config items or services</Item>
-                <Item Key="Action">AgentCMDBExplorer</Item>
-                <Item Key="Link">Action=AgentCMDBExplorer;ConfigItemID=$QData{"ConfigItemID"};EnableClustering=0;CompactTrace=1</Item>
+                <Item Key="DependsOn">filled</Item>
+                <Item Key="RelevantTo">dotted</Item>
+                <Item Key="ConnectedTo">filled</Item>
             </Hash>
         </Setting>
     </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###LinkArrows" Required="1" Valid="1">
+        <Description Translatable="1">Defines which arrows must be drawn for links in the explorer graph. Values must be valid graphviz edge dir (se
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="DependsOn">forward</Item>
+                <Item Key="RelevantTo">none</Item>
+                <Item Key="ConnectedTo">none</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions::LayoutOptions###dot" Required="1" Valid="1">
+        <Description Translatable="1">Defines rendering options for the 'dot' graphviz layout. Values must be valid graphviz options for the selecte
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="bgcolor">transparent</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions::LayoutOptions###neato" Required="1" Valid="1">
+        <Description Translatable="1">Defines rendering options for the 'neato' graphviz layout. Values must be valid graphviz options for the selec
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="bgcolor">transparent</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions::LayoutOptions###twopi" Required="1" Valid="1">
+        <Description Translatable="1">Defines rendering options for the 'twopi' graphviz layout. Values must be valid graphviz options for the selec
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="bgcolor">transparent</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions::LayoutOptions###circo" Required="1" Valid="1">
+        <Description Translatable="1">Defines rendering options for the 'circo' graphviz layout. Values must be valid graphviz options for the selec
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="bgcolor">transparent</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions::LayoutOptions###fdp" Required="1" Valid="1">
+        <Description Translatable="1">Defines rendering options for the 'fdp' graphviz layout. Values must be valid graphviz options for the selecte
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="bgcolor">transparent</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions::LayoutOptions###sfdp" Required="1" Valid="1">
+        <Description Translatable="1">Defines rendering options for the 'sfdp' graphviz layout. Values must be valid graphviz options for the select
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="bgcolor">transparent</Item>
+             </Hash>
+         </Setting>
+     </ConfigItem>
 </otrs_config>

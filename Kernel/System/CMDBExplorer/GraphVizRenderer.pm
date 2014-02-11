@@ -1,5 +1,6 @@
 # --
 # Kernel/System/CMDBExplorer/GraphVizRenderer.pm - render trace through graphviz library
+# Copyright (C) 2014- Belnet, http://www.belnet.be
 # Copyright (C) 2011 Thales Austria GmbH, http://www.thalesgroup.com/
 # --
 # $Id: CMDBExplorer.pm $
@@ -33,6 +34,7 @@ use warnings;
 use vars qw($VERSION);
 $VERSION = '0.6';
 
+use Kernel::Config;
 use Kernel::System::Service;
 use Kernel::System::ITSMConfigItem;
 use Kernel::System::LinkObject;
@@ -47,46 +49,10 @@ use GraphViz;
 # 
 # Mapping of object/link types to visual representation
 #
-our %ObjectType2Attrs =
-(
-    'Service'			         => { shape => 'box3d',
-					      style => 'filled',	
-					    },
-    'ITSMConfigItem::Data'               => { shape => 'folder',	},
-    'ITSMConfigItem::Computer'	         => { shape => 'house', 	},
-    'ITSMConfigItem::Software'	         => { shape => 'ellipse', 	},
-    'ITSMConfigItem::ServiceDescriptor'  => { shape => 'note', 		},
-    'ITSMConfigItem::TechnicalService'   => { shape => 'component', 
-					      style => 'filled', 
-					      fillcolor => 'lightblue', 
-					    },
-);
-
 our %InciStateColors =
 (
-    warning	=> 'yellow',
-    incident	=> 'red',
-);
-
-our %LinkDirType2Attrs =  # default, overriden by link-type specific attrs
-(
-    '>'		=> { dir => 'forward',	},
-    '='		=> { dir => 'none', 	},
-);
-
-our %LinkType2Attrs =
-(
-    DependsOn	  => { style => 'filled',  dir => 'forward', 	},
-    RelevantTo	  => { style => 'dotted',  dir => 'none', 	},
-    AlternativeTo => { style => 'dotted',  dir => 'both', 	},
-    ConnectedTo   => { style => 'filled',  dir => 'both',  
-		       arrowType => 'odot', 
-		     },
-    ComposedOf	  => { style => 'bold', 
-		       dir => 'back', 
-		       arrowtail => 'diamond', 
-		       label => '',
-		     },
+    warning	=> '#FFDD50', # yellow
+    incident	=> '#FF505E', # red
 );
 
 our %ClusterAttrs = 
@@ -101,9 +67,6 @@ our %ClusterAttrs =
 =over 4
 
 =cut
-#
-########################################################################
-
 
 ###  C o n s t r u c t o r  ############################################
 #
@@ -115,7 +78,6 @@ Creates an object
     my $GraphVizRenderer = Kernel::System::CMDBExplorer::GraphVizRenderer->new();
 
 =cut
-
 sub new {
     my ( $Type, %Param ) = @_;
 
@@ -123,12 +85,13 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
-    $Self->{Debug} = $Param{Debug} || 0;
+    $Self->{Debug}        = $Param{Debug} || 0;
+    $Self->{RootCI}       = $Param{RootCI} || 0;
+    $Self->{DisplayedCIs} = $Param{DisplayedCIs};
+    $Self->{Layout}       = $Param{Layout} || 'dot';
+
     return $Self;
-} # new()
-#
-########################################################################
-
+}
 
 ###  M e t h o d s  ####################################################
 #
@@ -170,7 +133,6 @@ the built-in mapping from objects & links to graphical elements.
     # as $Output->{dot}.
 
 =cut
-
 sub Render
 {
     my ($Self, %Param) = @_;
@@ -204,7 +166,7 @@ sub Render
 		Target      => $Target,
 	    } unless exists $Edges{$Target.$LinkType.$Source};	
 	}
-    } #for
+    }
 
     # Count hierarchy levels of services for later layout control
     my $MaxSvcLevel = 0;
@@ -218,21 +180,29 @@ sub Render
     $Self->{MaxSvcLevel} = $MaxSvcLevel;
 
     # Render all nodes
+    # Set selected layout's options from SysConfig
+    my $LayoutOptions = $Self->{LayoutOptions}->{$Self->{Layout}} || {};
+
+    # Prepare graph
     my $RankDir = ($OutputOptions =~ m/rotate/i ? 1 : 0);
-    my $g = GraphViz->new( rankdir => $RankDir, name => 'trace' );
+    my $g = GraphViz->new(
+        rankdir => $RankDir,
+        name    => 'trace',
+        layout  => $Self->{Layout},
+        %$LayoutOptions,
+    );
     $Self->{GraphVizObject} = $g;
 
+    # Render nodes
     for my $Object (values %Nodes) {
-	warn ("Node: ", $Object->ToString, "\n") if $Self->{Debug};
 	$Self->_renderObject($Object);
-    } #for
+    } 
 
-    # Add edges between the nodes
+    # Add edges
     for my $Link (values %Edges)
     {
-	warn ("Link: ", $Link->{Source}->ToString, "...\n") if $Self->{Debug};
 	$Self->_renderLink($Link);
-    } #for
+    } 
 
     # Produce output
     my $Output = { };
@@ -245,11 +215,7 @@ sub Render
 	$Output->{dot} = $g->as_canon;
     }
     return $Output;
-} # Render()
-#
-########################################################################
-
-
+} 
 
 ########################################################################
 # Private method that controls the rendering of a single object 
@@ -257,7 +223,10 @@ sub Render
 sub _renderObject {
     my ($Self, $Object) = @_;
 
-    my %attrs = %{$ObjectType2Attrs{$Object->GetFullType} || { }};
+    my %attrs;
+
+    # Set node'shape
+    $attrs{shape} = $Self->{GraphOptions}->{NodeShapes}->{$Object->GetFullType};
 
     # Cluster support?
     if ( exists $Self->{ClusterMap}->{$Object} ) {
@@ -283,8 +252,30 @@ sub _renderObject {
 	$attrs{URL} = 'index.pl?Action=AgentITSMServiceZoom;ServiceID='.$Object->GetID;
 	$attrs{tooltip} = "Service: " . __escape($Object->GetName);
     }
-    elsif ( $Type =~ m/^ITSMConfigItem/ ) {
-	$attrs{URL} = 'index.pl?Action=AgentITSMConfigItemZoom;ConfigItemID='.$Object->GetID;
+    elsif ( $Type =~ m/^ITSMConfigItem/ )
+    {
+        # Create URL
+        my $url ='index.pl?Action=AgentITSMConfigItemZoom;ConfigItemID=';
+        $url .= $Object->GetID;
+        $url .= ';DisplayedCIs=' . join(',' , @{ $Self->{DisplayedCIs} });
+
+        # Add or Remove node from URL
+        if ( $Object->GetID ~~  @{ $Self->{DisplayedCIs} } ) {
+            my $ID = $Object->GetID;
+            $url =~ s/,$ID//;
+            $url =~ s/$ID,//;
+        } else {
+            $url .= ',';
+            $url .= $Object->GetID;
+        }
+
+        # Add Layout to URL
+        $url .= ';Layout=' . $Self->{Layout};
+
+        # Add URL attribute
+        $attrs{URL} = $url;
+
+        # Add tooltip attribute
 	my $CIType = $Type;
 	$CIType =~ s/^.*:://;		# leave only specific CI type
 	$attrs{tooltip} = "$CIType: " . __escape($Object->GetName);
@@ -293,20 +284,34 @@ sub _renderObject {
     # Visually mark invalid items
     $attrs{style} = 'diagonals' unless $Object->IsValid;
 
+    # Set font size
+    $attrs{fontsize} = $Self->{GraphOptions}->{NodeFontSize};
+
+    # Set minimum node size
+    $attrs{height} = 0.1;
+    $attrs{width}  = 0.2;
+    $attrs{margin} = "0.03,0.03";
+
+    # Set default filling attributes
+    $attrs{style} = 'filled';
+    $attrs{fillcolor} = 'white';
+
     # Visually mark non-operational state
     my $InciStateColor = $InciStateColors{$Object->GetCurInciState};
     $attrs{fillcolor} = $InciStateColor if $InciStateColor;
 
+    # Set shape of currently selected CI
+    if ( $Object->GetID eq $Self->{RootCI} ) {
+        $attrs{shape} = 'doubleoctagon';
+    }
+
+    # Add node to graph
     $Self->{GraphVizObject}->add_node(
 	$Object->GetKey, 
 	label => __escape($Object->GetShortName), 
 	%attrs
     );
-} # _renderObject()
-#
-########################################################################
-
-
+}
 
 ########################################################################
 #
@@ -314,34 +319,39 @@ sub _renderObject {
 sub _renderLink {
     my ($Self, $Link) = @_;
 
-    my %attrs = ( %{$LinkDirType2Attrs{$Link->{LinkDirType}} || {}},
-		  %{$LinkType2Attrs{$Link->{LinkType}} || {}} );
+    my %attrs;
+
+    # Set link style and arrow
+    $attrs{style} = $Self->{GraphOptions}->{LinkStyles}->{$Link->{LinkType}};
+    $attrs{dir} = $Self->{GraphOptions}->{LinkArrows}->{$Link->{LinkType}};
+
+    # Set font size
+    $attrs{fontsize} = $Self->{GraphOptions}->{LinkFontSize};
+
+    # Add graphviz edge
     $Self->{GraphVizObject}->add_edge(
 	$Link->{Source}->GetKey => $Link->{Target}->GetKey, # from -> to
 	label 		        => $Link->{LinkType},
+        tooltip => $Link->{LinkType},
 	%attrs,
     );
-} # _renderLink()
+}
+
+########################################################################
 #
-########################################################################
-
-
-
-########################################################################
 # Function to protect quotes (i.e. convert " to ')
 sub __escape($) { 
     my $s = shift;
     $s =~ s/"/'/g;
     return $s;
 }
-#
-########################################################################
 1;
 
 =back
 
 =head1 TERMS AND CONDITIONS
 
+Copyright (C) 2014- Belnet, http://www.belnet.be
 Copyright (C) 2011 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
@@ -351,14 +361,13 @@ For license information, see the enclosed file COPYING-CMDBExplorer
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.
 
-
 =head1 VERSION
 
 0.6
 
-
 =head1 AUTHOR
 
+cyrille.bollu@belnet.be
 dietmar.berg@thalesgroup.com
 
 =cut

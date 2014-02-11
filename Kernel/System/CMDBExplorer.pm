@@ -129,9 +129,6 @@ sub _GetCommonObjects
     $CommonObjects{$_} = $Self->{$_} for ( @_COMMON_OBJECTS, 'Debug' );
     return \%CommonObjects;
 } # _GetCommonObjects()
-#
-########################################################################
-
 
 ###  M e t h o d s  ####################################################
 #
@@ -152,7 +149,6 @@ pseudo decomposition link.
     my $HashRef = $TraceObject->GetKnownLinkTypes();
 
 =cut
-
 sub GetKnownLinkTypes
 {
     my $Self = shift;
@@ -172,9 +168,7 @@ sub GetKnownLinkTypes
 		      						 if $Self->{Debug};
 
     return \%KnownLinkTypes;
-} # GetKnownLinkTypes()
-
-
+}
 
 =item GetKnownObjectTypes()
 
@@ -187,7 +181,6 @@ Object types are returned as the keys of a HASHref for use as lookup table.
     my $HashRef = $TraceObject->GetKnownObjectTypes();
 
 =cut
-
 sub GetKnownObjectTypes
 {
     my $Self = shift;
@@ -201,10 +194,7 @@ sub GetKnownObjectTypes
     warn join( "\n\t", "KnownObjectTypes: ", sort keys %KnownObjectTypes )."\n"
 							     if $Self->{Debug};
     return \%KnownObjectTypes;
-} # GetKnownObjectTypes()
-#
-########################################################################
-
+}
     
 ########################################################################
 #
@@ -259,7 +249,6 @@ If anything goes wrong, the method logs an error and returns C<undef>,
 otherwise it returns 1.
 
 =cut
-
 sub SetConstraints {    
     my ( $Self, %Param ) = @_;
 
@@ -338,11 +327,7 @@ sub SetConstraints {
     } #if
     $Self->{MaxTraceDepth} = $Param{MaxTraceDepth} || 0;
     return 1;
-} # SetConstraints()
-#
-########################################################################
-
-
+}
 
 ########################################################################
 #
@@ -380,10 +365,7 @@ sub _CheckStringListParam {
 	$Param = [ split(/\s*[,;]\s*/, $Param) ];
     } #elsif
     return $Param;
-} # _CheckStringListParam()
-#
-########################################################################
-
+}
 
 ########################################################################
 #
@@ -433,9 +415,6 @@ parts. For details, see the description of the renderer C<GraphVizRenderer>.
 If there is an error, this is logged and the method returns C<''>.
 
 =cut
-
-
-
 sub Trace
 {
     my ( $Self, %Param ) = @_;
@@ -451,6 +430,7 @@ sub Trace
     } #if
     $Self->{ServiceID}    = $Param{ServiceID}    if defined $Param{ServiceID};
     $Self->{ConfigItemID} = $Param{ConfigItemID} if defined $Param{ConfigItemID};
+    $Self->{DisplayedCIs} = $Param{DisplayedCIs} if defined $Param{DisplayedCIs};
 
     # check output format
     my %SupportedOutputFormats = ( 'text'   => 1,
@@ -478,7 +458,9 @@ sub Trace
     $Self->{VisitedObjects} = { };	# loop protection
     my @TraceSteps = ( );	# step includes link + object at "other" end
     for my $Object ( @{$Self->_expandServiceID(    $Self->{ServiceID}    ) },
-       		     @{$Self->_expandConfigItemID( $Self->{ConfigItemID} ) } ) 
+       		     @{$Self->_expandConfigItemID( $Self->{ConfigItemID} ) },
+                     @{$Self->_expandConfigItemID( $Self->{DisplayedCIs} ) } )
+
     {
 	# Prepare the "root" step of the trace (no link, just Object2)
 	my $TraceStep = { 
@@ -505,7 +487,12 @@ sub Trace
     } #if
     elsif ( $OutputFormat eq 'flat' ) {
 	my $Renderer = Kernel::System::CMDBExplorer::FlatFileObjectRenderer->new(
-		Debug => $Self->{Debug} 
+		Debug        => $Self->{Debug} 
+                RootCI       => $Self->{ConfigItemID}[0],
+                DisplayedCIs => $Self->{DisplayedCIs},
+                DisplayedCIs => $Self->{DisplayedCIs},
+                Layout       => $Param{Layout} || 'dot',
+
 	);
 	return $Renderer->Render(
 	    TraceSteps => \@TraceSteps,
@@ -518,16 +505,13 @@ sub Trace
 		Debug => $Self->{Debug} 
 	);
 	return $Renderer->Render(
-	    TraceSteps => \@TraceSteps,
-	    ClusterMap => $Self->{Object2Scope},
-	    OutputFormat => $OutputFormat,
+	    TraceSteps    => \@TraceSteps,
+	    ClusterMap    => $Self->{Object2Scope},
+	    OutputFormat  => $OutputFormat,
 	    OutputOptions => $Param{OutputOptions},
 	);
     }
-} # Trace()
-#
-########################################################################
-
+}
 
 ########################################################################
 #
@@ -539,7 +523,6 @@ sub _followLinks {
     $Self->{VisitedObjects}->{$Object}++;
     
     my $s = $Object->ToString;
-    warn "+ $Object:\t$s\n" if $Self->{Debug};
     
     my $ScopeObject = $Self->{Object2Scope}->{$Object}
     			 if $Self->{EnableClustering};
@@ -836,10 +819,7 @@ sub _renderAsText {
 	push @Text, $Text;
     } #for
     return { text => join( "\n", @Text, '') };
-} # _renderAsText
-#
-########################################################################
-
+}
 
 ########################################################################
 #
@@ -848,7 +828,9 @@ sub _renderAsText {
 # of 'IncludeInvalidObjects'.
 sub _expandServiceID {
     my ($Self, $ServiceID) = @_;
-    return [ ] unless defined $ServiceID;
+
+    return [ ] unless @{ $ServiceID }[0] ne '';
+
     my @Objects;
     if ($ServiceID > 0) {
 	# Single service, try to load it
@@ -878,46 +860,52 @@ sub _expandServiceID {
 	@Objects = sort { $a->GetRank <=> $b->GetRank } @Objects;
     } #else
     return \@Objects;
-} # expandServiceID()
+}
 
-
-
+########################################################################
+#
 # Private method to load initial config item(s); returns ARRAY ref.
 # Explicitly given CIs (by ID) are not filtered, otherwise filtering
 # respects IncludeInvalidObjects and ObjectTypes.
 sub _expandConfigItemID {
     my ($Self, $ConfigItemID) = @_;
-    return [ ] unless defined $ConfigItemID;
+
+    return [ ] unless @{ $ConfigItemID }[0] ne '';
+
     my @Objects = ( );
-    if ($ConfigItemID != 0) {
-	# Single config item, try to load it
-	my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
-	    %{$Self->_GetCommonObjects}, 
-	    Type => 'ITSMConfigItem', 
-	    ID => $Self->{ConfigItemID},
-	);
-	push (@Objects, $Object) if $Object;
-    } else { 
-	# All config items; load & filter
-	my $ConfigItemList = $Self->{ConfigItemObject}->ConfigItemSearch();
-	my $IncludeInvalidObjects = $Self->{IncludeInvalidObjects};
-	for my $ID ( @{$ConfigItemList} ) {
+
+    foreach my $CI ( @{ $ConfigItemID } ) {
+        if ($CI != 0) {
+            # Single config item, try to load it
 	    my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
-		%{$Self->_GetCommonObjects}, 
-		Type => 'ITSMConfigItem', 
-		ID => $ID,
+	        %{$Self->_GetCommonObjects}, 
+ 	        Type => 'ITSMConfigItem', 
+	        ID => $CI,
 	    );
-	    next unless $Object;
-	    next unless $Object->IsValid || $IncludeInvalidObjects;
-	    next unless $Self->_isObjectTypeAllowed($Object);
-	    push (@Objects, $Object);
-	} 
-    } #else
+            next unless $Object;
+            next unless $Object->IsValid || $IncludeInvalidObjects;
+            next unless $Self->_isObjectTypeAllowed($Object);
+  	    push (@Objects, $Object) if $Object;
+        } else { 
+	# All config items; load & filter
+    	    my $ConfigItemList = $Self->{ConfigItemObject}->ConfigItemSearch();
+	    my $IncludeInvalidObjects = $Self->{IncludeInvalidObjects};
+	    for my $ID ( @{$ConfigItemList} ) {
+	        my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
+		    %{$Self->_GetCommonObjects}, 
+		    Type => 'ITSMConfigItem', 
+		    ID => $ID,
+	        );
+	        next unless $Object;
+	        next unless $Object->IsValid || $IncludeInvalidObjects;
+	        next unless $Self->_isObjectTypeAllowed($Object);
+	        push (@Objects, $Object);
+	    } 
+        } #else
+    } #foreach
+
     return \@Objects;
-} # _expandConfigItemID()
-#
-########################################################################
-
+} 
 
 ########################################################################
 #
@@ -934,10 +922,10 @@ sub _isLinkTypeAllowed {
 	);
     }
     return 0;
-} # _isLinkTypeAllowed()
+}
 
-
-
+########################################################################
+#
 # Private method to check if a given object meets the current
 # type constraints
 sub _isObjectTypeAllowed {
@@ -954,10 +942,10 @@ sub _isObjectTypeAllowed {
 	);
     }
     return 0;
-} # _isObjectTypeAllowed()
+}
 
-
-
+########################################################################
+#
 # Private method to check if a given object meets the current 
 # incident state constraints (when following only "hot" links)
 sub _isObjectInciStateAllowed {
@@ -965,9 +953,7 @@ sub _isObjectInciStateAllowed {
     return 1 unless $Self->{TraceIncident};
     return 1 if $Object->GetCurInciState ne 'operational';
     return 0;
-} # _isObjectInciStateAllowed()
-#
-########################################################################
+}
 1;
 
 =back
