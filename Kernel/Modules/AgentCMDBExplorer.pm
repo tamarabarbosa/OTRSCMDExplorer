@@ -1,5 +1,6 @@
 # --
 # Kernel/Modules/AgentCMDBExplorer.pm - the OTRS::ITSM Trace module
+# Copyright (C) 2014 Belnet, http://www.belnet.be
 # Copyright (C) 2011 Thales Austria GmbH, http://www.thalesgroup.com/
 # --
 # $Id: AgentCMDBExplorer.pm $
@@ -189,6 +190,7 @@ sub Run {
 
 =head1 TERMS AND CONDITIONS
 
+Copyright (C) 2014- Belnet, http://www.belnet.be
 Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
@@ -201,6 +203,7 @@ http://www.gnu.org/licenses/agpl-3.0.html.
 
 =head1 AUTHOR
 
+cyrille.bollu@belnet.be
 dietmar.berg@thalesgroup.com
 
 =cut
