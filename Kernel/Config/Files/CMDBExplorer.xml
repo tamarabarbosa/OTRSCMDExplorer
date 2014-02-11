@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1" ?>
 <otrs_config version="1.0" init="Config">
-    <ConfigItem Name="Frontend::Module###AgentITSMTrace" Required="0" Valid="1">
+    <ConfigItem Name="Frontend::Module###AgentCMDBExplorer" Required="0" Valid="1">
         <Description Translatable="1">Frontend module registration for the agent interface.</Description>
         <Group>ITSM Configuration Management</Group>
         <SubGroup>Frontend::Agent::ModuleRegistration</SubGroup>
@@ -14,7 +14,7 @@
                 <NavBar>
                     <Description>Graphical Trace of Dependencies to Config Items</Description>
                     <Name>Trace</Name>
-                    <Link>Action=AgentITSMTrace;ServiceID=0;OutputOptions=rotate</Link>
+                    <Link>Action=AgentCMDBExplorer;ServiceID=0;OutputOptions=rotate</Link>
                     <Type></Type>
                     <Block></Block>
                     <NavBar>Service</NavBar>
@@ -24,7 +24,7 @@
                 <NavBar>
                     <Description>Graphical Trace of Dependencies between Config Items and Services</Description>
                     <Name>Trace</Name>
-                    <Link>Action=AgentITSMTrace;ConfigItemID=0;OutputOptions=rotate</Link>
+                    <Link>Action=AgentCMDBExplorer;ConfigItemID=0;OutputOptions=rotate</Link>
                     <Type></Type>
                     <Block></Block>
                     <NavBar>Config Item</NavBar>
@@ -47,7 +47,7 @@
                 <Item Key="Target">PopUp</Item>
                 <Item Key="Description">Trace links to config items</Item>
                 <Item Key="Action">AgentITSMTrace</Item>
-                <Item Key="Link">Action=AgentITSMTrace;ServiceID=$QData{"ServiceID"};EnableClustering=1;CompactTrace=1</Item>
+                <Item Key="Link">Action=AgentCMDBExplorer;ServiceID=$QData{"ServiceID"};EnableClustering=0;CompactTrace=1</Item>
             </Hash>
         </Setting>
     </ConfigItem>
@@ -64,7 +64,7 @@
                 <Item Key="Target">PopUp</Item>
                 <Item Key="Description">Trace links to/from config items or services</Item>
                 <Item Key="Action">AgentCMDBExplorer</Item>
-                <Item Key="Link">Action=AgentCMDBExplorer;ConfigItemID=$QData{"ConfigItemID"};EnableClustering=1;CompactTrace=1</Item>
+                <Item Key="Link">Action=AgentCMDBExplorer;ConfigItemID=$QData{"ConfigItemID"};EnableClustering=0;CompactTrace=1</Item>
             </Hash>
         </Setting>
     </ConfigItem>
