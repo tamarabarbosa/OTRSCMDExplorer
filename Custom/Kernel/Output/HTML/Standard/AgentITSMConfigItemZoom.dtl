@@ -85,7 +85,7 @@
 <!-- dtl:block:Menu -->
 <!-- dtl:block:MenuItem -->
                     <li>
-                        <a href="$Env{"Baselink"}$Data{"Link"}" title="$Text{"$Data{"Description"}"}">$Text{"$Data{"Name"}"}</a>
+                        <a href="$Env{"Baselink"}$Data{"Link"}" class="$QData{"MenuClass"}" title="$Text{"$Data{"Description"}"}">$Text{"$Data{"Name"}"}</a>
                     </li>
 <!-- dtl:block:MenuItem --> 
 <!-- dtl:block:Menu -->
