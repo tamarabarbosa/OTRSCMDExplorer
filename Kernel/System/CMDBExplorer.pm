@@ -163,10 +163,6 @@ sub GetKnownLinkTypes
     $KnownLinkTypes{$IncidentLinkType} = '!' if $KnownLinkTypes{$IncidentLinkType};
     $Self->{KnownLinkTypes} = \%KnownLinkTypes;		# cache it
 
-    warn join( "\n\t", "KnownLinkTypes: ", 
-		 map ( "$KnownLinkTypes{$_} $_", sort keys %KnownLinkTypes ))."\n"
-		      						 if $Self->{Debug};
-
     return \%KnownLinkTypes;
 }
 
@@ -184,15 +180,17 @@ Object types are returned as the keys of a HASHref for use as lookup table.
 sub GetKnownObjectTypes
 {
     my $Self = shift;
+
     my %KnownObjectTypes = ( 'Service' => 1, 'ITSMConfigItem' => 1, ); # "built-in"
+
     # add specializations of config items as separate object types
     my $ITSMConfigItemClasses = $Self->{GeneralCatalogObject}->ItemList(
 	Class => 'ITSM::ConfigItem::Class',
 	Valid => 1, 
     );
+
     $KnownObjectTypes{"ITSMConfigItem::$_"} = 1 for values %$ITSMConfigItemClasses;
-    warn join( "\n\t", "KnownObjectTypes: ", sort keys %KnownObjectTypes )."\n"
-							     if $Self->{Debug};
+
     return \%KnownObjectTypes;
 }
     
@@ -487,12 +485,11 @@ sub Trace
     } #if
     elsif ( $OutputFormat eq 'flat' ) {
 	my $Renderer = Kernel::System::CMDBExplorer::FlatFileObjectRenderer->new(
-		Debug        => $Self->{Debug} 
+		Debug        => $Self->{Debug},
                 RootCI       => $Self->{ConfigItemID}[0],
                 DisplayedCIs => $Self->{DisplayedCIs},
                 DisplayedCIs => $Self->{DisplayedCIs},
                 Layout       => $Param{Layout} || 'dot',
-
 	);
 	return $Renderer->Render(
 	    TraceSteps => \@TraceSteps,
@@ -502,7 +499,11 @@ sub Trace
     else {
 	# All other formats are provided by the external GraphViz renderer
 	my $Renderer = Kernel::System::CMDBExplorer::GraphVizRenderer->new(
-		Debug => $Self->{Debug} 
+		Debug        => $Self->{Debug},
+                RootCI       => $Self->{ConfigItemID}[0],
+                DisplayedCIs => $Self->{DisplayedCIs},
+                DisplayedCIs => $Self->{DisplayedCIs},
+                Layout       => $Param{Layout} || 'dot',
 	);
 	return $Renderer->Render(
 	    TraceSteps    => \@TraceSteps,
@@ -874,6 +875,8 @@ sub _expandConfigItemID {
 
     my @Objects = ( );
 
+    my $IncludeInvalidObjects = $Self->{IncludeInvalidObjects};
+
     foreach my $CI ( @{ $ConfigItemID } ) {
         if ($CI != 0) {
             # Single config item, try to load it
@@ -915,7 +918,6 @@ sub _isLinkTypeAllowed {
     return 1 unless exists $Self->{LinkTypes};		# not filtered
     return 1 if $Self->{LinkTypes}->{$LinkType};	
     if ($Self->{Debug}) {
-	warn "Skipping filtered link type '$LinkType'\n";
 	$Self->{LogObject}->Log(
 	    Priority => 'debug',
 	    Message  => "Skipping filtered link type '$LinkType'.",
@@ -935,7 +937,6 @@ sub _isObjectTypeAllowed {
     return 1 if $Self->{ObjectTypes}->{$Object->GetFullType};
     if ($Self->{Debug}) {
 	my $T = $Object->GetFullType;
-	warn "Skipping filtered object type '$T'\n";
 	$Self->{LogObject}->Log(
 	    Priority => 'debug',
 	    Message  => "Skipping filtered object type '$T'.",

@@ -44,7 +44,9 @@ sub new {
     $Self->{ConfigItemObject}     = Kernel::System::ITSMConfigItem->new(%Param);
     $Self->{LinkObject}           = Kernel::System::LinkObject->new(%Param);
 
+###### OTRSCMDBExplorer ######
     $Self->{ServiceObject} = Kernel::System::Service->new(%Param);
+###### OTRSCMDBExplorer ######
 
     # get config of frontend module
     $Self->{Config} = $Self->{ConfigObject}->Get("ITSMConfigItem::Frontend::$Self->{Action}");

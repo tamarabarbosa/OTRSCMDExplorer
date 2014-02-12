@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <otrs_package version="1.0">
     <Name>OTRSCMDBExplorer</Name>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Framework>3.2.x</Framework>
     <Vendor>Belnet</Vendor>
     <URL>http://belnet.be</URL>
     <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
+    <ChangeLog Version="0.0.2" Date="2014-02-12 10:17:00">Implemented first CMDBExplorer specific functionalities</ChangeLog>
     <ChangeLog Version="0.0.2" Date="2014-02-11 15:41:00">Fixed a few ITSMTrace->CMDBExplorer renaming + Changed the EnableClustering setting to 0</ChangeLog>
     <ChangeLog Version="0.0.1" Date="2014-02-11 14:41:00">New package (forked from ITSMTrace-0.8.1)</ChangeLog>
     <Description Lang="en">A graphical CMDB explorer.</Description>
@@ -17,14 +18,13 @@
         <File Permission="644" Location="doc/en/CMDBExplorer.pdf"></File>
         <File Permission="644" Location="doc/en/CMDBExplorer.pod"></File>
         <File Permission="644" Location="Kernel/Config/Files/CMDBExplorer.xml"></File>
-        <File Permission="644" Location="Kernel/Modules/AgentCMDBExplorer.pm"></File>
-        <File Permission="644" Location="Kernel/Output/HTML/ITSMConfigItemMenuTrace.pm"></File>
-        <File Permission="644" Location="Kernel/Output/HTML/ITSMServiceMenuTrace.pm"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer.pm"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer/FlatFileObjectRenderer.pm"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer/GraphVizRenderer.pm"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer/ObjectWrapper.pm"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer/Scope.pm"></File>
+        <File Permission="644" Location="Custom/Kernel/Modules/AgentITSMConfigItemZoom.pm"></File>
+        <File Permission="644" Location="Custom/Kernel/Output/HTML/Standard/AgentITSMConfigItemZoom.dtl"></File>
     </Filelist>
-    <IntroInstall Type="pre" Lang="en" Title="CMDBExplorer dependency notice"><![CDATA[Please note that the CMDBExplorer AddOn require graphviz to be installed on your system!]]></IntroInstall>
+    <IntroInstall Type="pre" Lang="en" Title="CMDBExplorer dependency notice">Please note that the CMDBExplorer AddOn require graphviz to be installed on your system.</IntroInstall>
 </otrs_package>

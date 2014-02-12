@@ -51,8 +51,8 @@ use GraphViz;
 #
 our %InciStateColors =
 (
-    warning	=> '#FFDD50', # yellow
-    incident	=> '#FF505E', # red
+    Warning	=> '#FFDD50', # yellow
+    Incident	=> '#FF505E', # red
 );
 
 our %ClusterAttrs = 
@@ -89,6 +89,11 @@ sub new {
     $Self->{RootCI}       = $Param{RootCI} || 0;
     $Self->{DisplayedCIs} = $Param{DisplayedCIs};
     $Self->{Layout}       = $Param{Layout} || 'dot';
+
+    # Get config
+    $Self->{ConfigObject} = Kernel::Config->new();
+    $Self->{GraphOptions} = $Self->{ConfigObject}->Get("CMDBExplorer::GraphOptions");
+    $Self->{LayoutOptions} = $Self->{ConfigObject}->Get("CMDBExplorer::GraphOptions::LayoutOptions");
 
     return $Self;
 }

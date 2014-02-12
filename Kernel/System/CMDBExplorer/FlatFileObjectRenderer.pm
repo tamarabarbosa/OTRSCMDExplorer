@@ -171,7 +171,6 @@ sub Render
 
     # Render all nodes
     for my $Object (values %Nodes) {
-	warn ("Node: ", $Object->ToString, "\n") if $Self->{Debug};
 	$Self->_renderObject($Object);
     } #for
 
