@@ -396,7 +396,7 @@ sub Run {
     # Set default constraints (from ITSMTrace; dont known the exact purpose)
     $Tracer->SetConstraints( 
         CompactTrace => 1,
-        EnableClustering => 0,
+        MaxTraceDepth => 1,
     );
 
     # Create the graph

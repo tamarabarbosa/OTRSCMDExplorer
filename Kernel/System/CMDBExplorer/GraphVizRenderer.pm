@@ -44,7 +44,6 @@ use Kernel::System::CMDBExplorer::ObjectWrapper;
 
 use GraphViz;
 
-
 ########################################################################
 # 
 # Mapping of object/link types to visual representation
@@ -217,85 +216,70 @@ sub _renderObject {
 
     my %attrs;
 
-    # Set node'shape
+    # Set default node attributes
     $attrs{shape} = $Self->{GraphOptions}->{NodeShapes}->{$Object->GetFullType};
-
-    # Cluster support?
-    if ( exists $Self->{ClusterMap}->{$Object} ) {
-	my $Scope = $Self->{ClusterMap}->{$Object};
-	my $ClusterID = $Scope->GetAllScopeIDsList;
-	my $Cluster;
-	if (! exists $Self->{ClusterID2Cluster}->{$ClusterID} ) {
-	    $Cluster = { %ClusterAttrs };	# new
-	    $Self->{ClusterID2Cluster}->{$ClusterID} = $Cluster;
-	    $Cluster->{name} = $Scope->ToString; # ClusterID if $Self->{Debug};
-	} else {
-	    $Cluster = $Self->{ClusterID2Cluster}->{$ClusterID};
-	} #else
-	$attrs{cluster} = $Cluster;
-    } #if
+    $attrs{fontsize} = $Self->{GraphOptions}->{NodeFontSize} || 8;
+    $attrs{color} = $Self->{GraphOptions}->{NodeDefaultColor} || 'LightSteelBlue4';
+    $attrs{fillcolor} =  $Self->{GraphOptions}->{NodeDefaultFillColor} || 'white';
+    $attrs{height} = 0.1;
+    $attrs{width}  = 0.2;
+    $attrs{margin} = "0.03,0.03";
+    $attrs{style} = 'filled';
 
     # Type-specific refinement
     my $Type = $Object->GetFullType;
-    if ( $Type eq 'Service' )
-    {
+    if ( $Type eq 'Service' ) {
 	my $Name = $Object->GetName;
 	my $Level = scalar (my @x = split /::/, $Name);
 	$attrs{URL} = 'index.pl?Action=AgentITSMServiceZoom;ServiceID='.$Object->GetID;
 	$attrs{tooltip} = "Service: " . __escape($Object->GetName);
     }
-    elsif ( $Type =~ m/^ITSMConfigItem/ )
-    {
-        # Create URL
+    elsif ( $Type =~ m/^ITSMConfigItem/ ) {
+        my $ID = $Object->GetID;
+
+        # URL init
         my $url ='index.pl?Action=AgentITSMConfigItemZoom;ConfigItemID=';
-        $url .= $Object->GetID;
-        $url .= ';DisplayedCIs=' . join(',' , @{ $Self->{DisplayedCIs} });
+        my $urlDisplayedCIs .= ';DisplayedCIs=' . join(',' , @{ $Self->{DisplayedCIs} });
 
-        # Add or Remove node from URL
-        if ( $Object->GetID ~~  @{ $Self->{DisplayedCIs} } ) {
-            my $ID = $Object->GetID;
-            $url =~ s/,$ID//;
-            $url =~ s/$ID,//;
+        # Tooltip init
+	my $Tooltip = $Type;
+        $Tooltip =~ s/^.*:://; 
+        $Tooltip .= __escape($Object->GetName);
+
+        # Change attributes depending on CI
+        if ( $ID eq $Self->{RootCI} ) {
+            $attrs{fillcolor} = $Self->{GraphOptions}->{RootNodeColor} || 'LightSteelBlue2';
+            $url .= $ID;
+            $Tooltip .= " (Root CI)";
+        } elsif ( $ID ~~  @{ $Self->{DisplayedCIs} } ) {
+            # Clicking on the node will remove it from the graph
+            $attrs{fillcolor} = $Self->{GraphOptions}->{DisplayedNodeColor} || 'LightSteelBlue1';
+            $url .= $Self->{RootCI};
+            $urlDisplayedCIs =~ s/,$ID//;
+            $urlDisplayedCIs =~ s/$ID,//;
+            $Tooltip .= " (Click to remove from graph)";
         } else {
-            $url .= ',';
-            $url .= $Object->GetID;
+            # Clicking on the node will add it from the graph
+            $url .= $ID;
+            $urlDisplayedCIs .= ',' . $ID;
+            $Tooltip .= " (Click to add to graph)";
         }
-
-        # Add Layout to URL
+        $url .= $urlDisplayedCIs;
         $url .= ';Layout=' . $Self->{Layout};
 
         # Add URL attribute
         $attrs{URL} = $url;
 
         # Add tooltip attribute
-	my $CIType = $Type;
-	$CIType =~ s/^.*:://;		# leave only specific CI type
-	$attrs{tooltip} = "$CIType: " . __escape($Object->GetName);
+	$attrs{tooltip} = $Tooltip;
     }
 
     # Visually mark invalid items
     $attrs{style} = 'diagonals' unless $Object->IsValid;
 
-    # Set font size
-    $attrs{fontsize} = $Self->{GraphOptions}->{NodeFontSize} || 8;
-
-    # Set minimum node size
-    $attrs{height} = 0.1;
-    $attrs{width}  = 0.2;
-    $attrs{margin} = "0.03,0.03";
-
-    # Set default filling attributes
-    $attrs{style} = 'filled';
-    $attrs{fillcolor} = 'white';
-
     # Visually mark non-operational state
     my $InciStateColor = $InciStateColors{$Object->GetCurInciState};
-    $attrs{fillcolor} = $InciStateColor if $InciStateColor;
-
-    # Set shape of currently selected CI
-    if ( $Object->GetID eq $Self->{RootCI} ) {
-        $attrs{shape} = 'doubleoctagon';
-    }
+    $attrs{color} = $InciStateColor if $InciStateColor;
 
     # Add node to graph
     $Self->{GraphVizObject}->add_node(
@@ -313,15 +297,12 @@ sub _renderLink {
 
     my %attrs;
 
-    # Set link style and arrow
+    # Set default link attributes
     $attrs{style} = $Self->{GraphOptions}->{LinkStyles}->{$Link->{LinkType}} || 'filled';
     $attrs{dir} = $Self->{GraphOptions}->{LinkArrows}->{$Link->{LinkType}} || 'none';
-
-    # Set font size
     $attrs{fontsize} = $Self->{GraphOptions}->{LinkFontSize} || 6;
-
-    # Set default link color
-    $attrs{color} =  $Self->{GraphOptions}->{DefaultLinkColor} || 'gray';
+    $attrs{color} =  $Self->{GraphOptions}->{LinkDefaultColor} || 'LightSteelBlue4';
+    $attrs{fontcolor} =  $Self->{GraphOptions}->{LinkDefaultFontColor} || 'LightSteelBlue4';
 
     # Mark links between CI in non-operational state
     if ( $Link->{LinkType} eq 'DependsOn' ) {

@@ -45,8 +45,6 @@ use Kernel::System::GeneralCatalog;
 use Kernel::System::CMDBExplorer::ObjectWrapper;
 use Kernel::System::CMDBExplorer::Scope;
 use Kernel::System::CMDBExplorer::GraphVizRenderer;
-use Kernel::System::CMDBExplorer::FlatFileObjectRenderer;
-
 
 =head1 PUBLIC INTERFACE
 
@@ -235,10 +233,6 @@ to an object which initially starts a trace.
 	# recursion after a non-directed link to get a more compact trace
 	CompactTrace  => 0, 			# 0 | 1
 
-	# Flag to assess logical "proximity" of CIs by the services they are
-	# linked to; useful to get more understandable graphical output
-	EnableClustering  => 0, 		# 0 | 1
-
 	# Number of "hops" to traverse; 0 = unlimited
 	MaxTraceDepth => 0,           		# >= 0
     );
@@ -303,8 +297,7 @@ sub SetConstraints {
 
     for my $Key ( qw( IncludeInvalidObjects 
 	    	      TraceIncident 
-	    	      CompactTrace 
-		      EnableClustering )) {
+	    	      CompactTrace )) {
 	if ( $Param{$Key} && $Param{$Key} !~ m{^[01]$} ) {
 	    $Self->{LogObject}->Log(
 		Priority => 'error',
@@ -431,7 +424,6 @@ sub Trace
     # Init
     Kernel::System::CMDBExplorer::ObjectWrapper->Init();	# clear cache
     $Self->GetKnownLinkTypes;	# preload private link type lookup table
-    $Self->_preloadScopes if $Self->{EnableClustering};
 
     # Start the recursion to build the trace
     $Self->{VisitedObjects} = { };	# loop protection
@@ -484,15 +476,13 @@ sub _followLinks {
     
     my $s = $Object->ToString;
     
-    my $ScopeObject = $Self->{Object2Scope}->{$Object}
-    			 if $Self->{EnableClustering};
-
     # Get links of current object, follow them
     my @TraceSteps = ( );
     my $IncludeInvalidObjects = $Self->{IncludeInvalidObjects};
     my $LinkList = $Object->GetLinkList;
     for my $LinkedClass (keys %$LinkList)
     {
+print STDERR "_followLinks: LinkedClass = $LinkedClass \n";
 	if ($LinkedClass eq 'Ticket')
 	{
 	    1;		# DEBUG: x %{$LinkList->{$LinkedClass}}	    
@@ -500,8 +490,11 @@ sub _followLinks {
 	}
 	for my $LinkType (keys %{$LinkList->{$LinkedClass}})
 	{
+print STDERR "_followLinks: LinkType = $LinkType \n";
 	    next unless $Self->_isLinkTypeAllowed($LinkType);	# filtered?
 	    my $LinkDirType = $Self->{KnownLinkTypes}->{$LinkType};
+print STDERR "_followLinks: LinkDirType = $LinkDirType \n";
+	    next unless $Self->_isLinkTypeAllowed($LinkType);	# filtered?
 	    my $PosDelta = ( $LinkDirType eq '=' ? 0 : 1 );
 
 	    # Follow out-links
@@ -509,6 +502,7 @@ sub _followLinks {
 	    # at or "below" the root obj and the link goes "down" or it is
 	    # a non-directed link
 	    if ( !$Self->{CompactTrace} || $PosDelta && ($Pos>=0) || !$PosDelta ) {
+print STDERR "_followLinks: following an OUT-LINK\n";
 		my @TargetIDs = 
 			keys %{$LinkList->{$LinkedClass}->{$LinkType}->{Target}};
 		for my $ID (@TargetIDs)
@@ -555,15 +549,6 @@ sub _followLinks {
 		    # Do not recurse if CompactTrace AND 
 		    #   (this is not a directed link OR this CI begins new scope)
 		    my $NewScope;
-		    if ( $Self->{EnableClustering} && $TargetObject->GetType eq 'ITSMConfigItem') {
-			my $TargetScopeObject = $Self->{Object2Scope}->{$TargetObject};
-			# A "new scope" is when the target object is a CI with at least 
-			# one explicit scope ID that is not in the list of scope IDs of 
-			# the source object. This means that this CI is detailed within 
-			# the scope of a different service and the recursion is to end 
-			# after this CI.
-			$NewScope = _isNewScope( $ScopeObject, $TargetScopeObject );
-		    } #if
 		    next if $Self->{CompactTrace} && 
 		    	( !$PosDelta || (defined($NewScope) && $NewScope) );
 
@@ -586,6 +571,7 @@ sub _followLinks {
 	    # at or "above" (<0) the root obj and the link goes "up" or it is
 	    # a non-directed link
 	    if ( !$Self->{CompactTrace} || $PosDelta && ( $Pos <= 0 ) || !$PosDelta ) {
+print STDERR "_followLinks: following an IN-LINK\n";
 		my @SourceIDs = keys %{$LinkList->{$LinkedClass}->{$LinkType}->{Source}};
 		for my $ID (@SourceIDs)
 		{

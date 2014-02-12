@@ -1,23 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1" ?>
 <otrs_config version="1.0" init="Config">
-    <ConfigItem Name="CMDBExplorer::GraphOptions###LinkFontSize" Required="1" Valid="1">
-        <Description Translatable="1">Font size for the link labels (if displayed)</Description>
-        <Group>CMDBExplorer</Group>
-        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
-        <Setting>
-            <String Regex="^[0-9]{1,2}$">6</String>
-        </Setting>
-    </ConfigItem>
-
-    <ConfigItem Name="CMDBExplorer::GraphOptions###NodeFontSize" Required="1" Valid="1">
-        <Description Translatable="1">Font size for the node labels</Description>
-        <Group>CMDBExplorer</Group>
-        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
-        <Setting>
-            <String Regex="^[0-9]{1,2}$">6</String>
-        </Setting>
-    </ConfigItem>
-
     <ConfigItem Name="CMDBExplorer::GraphOptions###DisplayLinksName" Required="1" Valid="1">
         <Description Translatable="1">Whether links name should be displayed in the CMDB explorer graph or not</Description>
         <Group>CMDBExplorer</Group>
@@ -30,25 +12,50 @@
         </Setting>
     </ConfigItem>
 
-    <ConfigItem Name="CMDBExplorer::GraphOptions###DefaultLinkColor" Required="1" Valid="1">
+    <ConfigItem Name="CMDBExplorer::GraphOptions###RootNodeColor" Required="1" Valid="1">
+        <Description Translatable="1">Fillcolor of the Root node. The root node is the one that's currently displayed in the AgentITSMConfigItemZoom screen.</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+                <String>No</String>
+            </Option>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###DisplayedNodeColor" Required="1" Valid="1">
+        <Description Translatable="1">Defines the fillcolor of the nodes that have been specificaly selected by the agent for inclusion in the graph.</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+                <String>No</String>
+            </Option>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###LinkDefaultColor" Required="1" Valid="1">
         <Description Translatable="1">Default link color (must be a valid graphviz color)</Description>
         <Group>CMDBExplorer</Group>
         <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
         <Setting>
-            <String>gray</String>
+            <String>gray60</String>
         </Setting>
     </ConfigItem>
 
-    <ConfigItem Name="CMDBExplorer::GraphOptions###NodeShapes" Required="1" Valid="1">
-        <Description Translatable="1">Defines the shapes (eg: box, ellipse, none) that will be user for rendering nodes in the explorer graph. Values must be valid graphviz node shape (see dot's man page).</Description>
+    <ConfigItem Name="CMDBExplorer::GraphOptions###LinkDefaultFontColor" Required="1" Valid="1">
+        <Description Translatable="1">Default link font's color when link labels are displayed (must be a valid graphviz color).</Description>
         <Group>CMDBExplorer</Group>
         <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
         <Setting>
-            <Hash>
-                <Item Key="Service">box3d</Item>
-                <Item Key="ITSMConfigItem::Computer">box</Item>
-                <Item Key="ITSMConfigItem::Location">house</Item>
-            </Hash>
+            <String>gray35</String>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###LinkFontSize" Required="1" Valid="1">
+        <Description Translatable="1">Font size for the link labels (if displayed)</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <String Regex="^[0-9]{1,2}$">6</String>
         </Setting>
     </ConfigItem>
 
@@ -74,6 +81,46 @@
                 <Item Key="DependsOn">forward</Item>
                 <Item Key="RelevantTo">none</Item>
                 <Item Key="ConnectedTo">none</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###NodeDefaultColor" Required="1" Valid="1">
+        <Description Translatable="1">Default node color (must be a valid graphviz color)</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <String>gray30</String>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###NodeDefaultFillColor" Required="1" Valid="1">
+        <Description Translatable="1">Default node fillcolor (must be a valid graphviz color)</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <String>white</String>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###NodeFontSize" Required="1" Valid="1">
+        <Description Translatable="1">Font size for the node labels</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <String Regex="^[0-9]{1,2}$">6</String>
+        </Setting>
+    </ConfigItem>
+
+    <ConfigItem Name="CMDBExplorer::GraphOptions###NodeShapes" Required="1" Valid="1">
+        <Description Translatable="1">Defines the shapes (eg: box, ellipse, none) that will be user for rendering nodes in the explorer graph. Values must be valid graphviz node shape (see dot's man page).</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="Service">box3d</Item>
+                <Item Key="ITSMConfigItem::Computer">box</Item>
+                <Item Key="ITSMConfigItem::Location">house</Item>
             </Hash>
         </Setting>
     </ConfigItem>

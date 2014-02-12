@@ -19,7 +19,6 @@
         <File Permission="644" Location="doc/en/CMDBExplorer.pod"></File>
         <File Permission="644" Location="Kernel/Config/Files/CMDBExplorer.xml"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer.pm"></File>
-        <File Permission="644" Location="Kernel/System/CMDBExplorer/FlatFileObjectRenderer.pm"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer/GraphVizRenderer.pm"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer/ObjectWrapper.pm"></File>
         <File Permission="644" Location="Kernel/System/CMDBExplorer/Scope.pm"></File>
