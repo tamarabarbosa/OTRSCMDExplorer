@@ -358,11 +358,11 @@ sub Run {
 ###### OTRSCMDBExplorer ######
     my $Tracer = Kernel::System::CMDBExplorer->new(%{$Self}, Debug => 1);
 
-    # Set custom graph parameters from URI
+    # Get graph parameters from URI
     my %TraceParams;
     my @RootCI = ( $ConfigItemID ); 
     $TraceParams{ConfigItemID} = \@RootCI; 
-     my @DisplayedCIs;
+    my @DisplayedCIs;
     if ( $Self->{ParamObject}->GetParam( Param => 'DisplayedCIs' ) ) {
         @DisplayedCIs = split( ',' ,$Self->{ParamObject}->GetParam( Param => 'DisplayedCIs' ) );
     } else {
@@ -370,7 +370,6 @@ sub Run {
     }
     $TraceParams{DisplayedCIs} =  \@DisplayedCIs;
     $TraceParams{Layout} = $Self->{ParamObject}->GetParam( Param => 'Layout' ) || 'dot';
-    $TraceParams{OutputFormat} = 'imgmap'; 
 
     # Display graph layout selection field
     my $LayoutStrg = $Self->{LayoutObject}->BuildSelection(

@@ -128,8 +128,6 @@ the built-in mapping from objects & links to graphical elements.
 
     my $Output = $GraphVizRenderer->Render(
         TraceSteps	=> $TraceSteps,
-        OutputFormat 	=> 'imgmap', 	# (optional), default = 'dot'
-        OutputOption 	=> 'rotate', 	# (optional) (format-specific)
         ClusterMap 	=> $Object2Scope # (optional) (object-to-scope mapping)
     );
     # $Output->{png} now contains the PNG image of the graph, 
@@ -142,8 +140,6 @@ sub Render
 {
     my ($Self, %Param) = @_;
     my $TraceSteps   = $Param{TraceSteps} || [ ];
-    my $OutputFormat = $Param{OutputFormat} ||'dot';
-    my $OutputOptions = $Param{OutputOptions} ||'';
     $Self->{ClusterMap} = $Param{ClusterMap} if exists $Param{ClusterMap};
 
     # Turn trace steps into (unique) nodes and edges
@@ -184,14 +180,11 @@ sub Render
     } # for
     $Self->{MaxSvcLevel} = $MaxSvcLevel;
 
-    # Render all nodes
     # Set selected layout's options from SysConfig
     my $LayoutOptions = $Self->{LayoutOptions}->{$Self->{Layout}} || {};
 
     # Prepare graph
-    my $RankDir = ($OutputOptions =~ m/rotate/i ? 1 : 0);
     my $g = GraphViz->new(
-        rankdir => $RankDir,
         name    => 'trace',
         layout  => $Self->{Layout},
         %$LayoutOptions,
@@ -204,21 +197,15 @@ sub Render
     } 
 
     # Add edges
-    for my $Link (values %Edges)
-    {
+    for my $Link (values %Edges) {
 	$Self->_renderLink($Link);
     } 
 
     # Produce output
     my $Output = { };
-    if ($OutputFormat eq 'png') {
-	$Output->{png} = $g->as_png;
-    } elsif ($OutputFormat eq 'imgmap') {
-	$Output->{map} = $g->as_cmapx;
-	$Output->{png} = $g->as_png;
-    } else {
-	$Output->{dot} = $g->as_canon;
-    }
+    $Output->{map} = $g->as_cmapx;
+    $Output->{png} = $g->as_png;
+
     return $Output;
 } 
 
@@ -290,7 +277,7 @@ sub _renderObject {
     $attrs{style} = 'diagonals' unless $Object->IsValid;
 
     # Set font size
-    $attrs{fontsize} = $Self->{GraphOptions}->{NodeFontSize};
+    $attrs{fontsize} = $Self->{GraphOptions}->{NodeFontSize} || 8;
 
     # Set minimum node size
     $attrs{height} = 0.1;
@@ -327,15 +314,30 @@ sub _renderLink {
     my %attrs;
 
     # Set link style and arrow
-    $attrs{style} = $Self->{GraphOptions}->{LinkStyles}->{$Link->{LinkType}};
-    $attrs{dir} = $Self->{GraphOptions}->{LinkArrows}->{$Link->{LinkType}};
+    $attrs{style} = $Self->{GraphOptions}->{LinkStyles}->{$Link->{LinkType}} || 'filled';
+    $attrs{dir} = $Self->{GraphOptions}->{LinkArrows}->{$Link->{LinkType}} || 'none';
 
     # Set font size
-    $attrs{fontsize} = $Self->{GraphOptions}->{LinkFontSize};
+    $attrs{fontsize} = $Self->{GraphOptions}->{LinkFontSize} || 6;
+
+    # Set default link color
+    $attrs{color} =  $Self->{GraphOptions}->{DefaultLinkColor} || 'gray';
+
+    # Mark links between CI in non-operational state
+    if ( $Link->{LinkType} eq 'DependsOn' ) {
+        for my $Node ( 'Source', 'Target' ) {
+            if ( $Link->{$Node}->GetCurInciState eq 'Incident' ) {
+                $attrs{color} = $InciStateColors{Incident};
+                last;
+            } elsif ( $Link->{$Node}->GetCurInciState eq 'Warning' ) {
+                $attrs{color} = $InciStateColors{Warning};
+            }
+        }
+    }
 
     # Add graphviz edge
     $Self->{GraphVizObject}->add_edge(
-	$Link->{Source}->GetKey => $Link->{Target}->GetKey, # from -> to
+	$Link->{Source}->GetKey => $Link->{Target}->GetKey,
 	label 		        => $Link->{LinkType},
         tooltip => $Link->{LinkType},
 	%attrs,

@@ -403,8 +403,6 @@ be passed to the renderer.
 
     my $OutputRef = $TraceObject->Trace(
 	...
-	OutputFormat	=> 'image', 	# (optional), default 'text'
-	OutputOptions	=> '...',	# (optional), passed through
     );
 
 The output is returned as HASHref, since it can consist of multiple 
@@ -429,23 +427,6 @@ sub Trace
     $Self->{ServiceID}    = $Param{ServiceID}    if defined $Param{ServiceID};
     $Self->{ConfigItemID} = $Param{ConfigItemID} if defined $Param{ConfigItemID};
     $Self->{DisplayedCIs} = $Param{DisplayedCIs} if defined $Param{DisplayedCIs};
-
-    # check output format
-    my %SupportedOutputFormats = ( 'text'   => 1,
-	 			   'flat'   => 1, 
-	 			   'png'    => 1, 
-	    			   'imgmap' => 1, 
-				   'dot'    => 1, );
-    if (    $Param{OutputFormat} 
-	 && ! $SupportedOutputFormats{$Param{OutputFormat}} ) {
-        $Self->{LogObject}->Log(
-            Priority => 'error',
-            Message  => "Unknown output format '$Param{OutputFormat}', "
-	    	      . "must be one of '"
-	    	      . join( "', '", sort keys  %SupportedOutputFormats) . "'!",
-        );
-        return '';
-    } #if
 
     # Init
     Kernel::System::CMDBExplorer::ObjectWrapper->Init();	# clear cache
@@ -478,40 +459,18 @@ sub Trace
     } #for
 
     # Create output, return it
-    my $OutputFormat = $Param{OutputFormat} || 'text';
-    # Use built-in text renderer?
-    if ( $OutputFormat eq 'text' ) {	# internal renderer?
-	return $Self->_renderAsText(\@TraceSteps);
-    } #if
-    elsif ( $OutputFormat eq 'flat' ) {
-	my $Renderer = Kernel::System::CMDBExplorer::FlatFileObjectRenderer->new(
-		Debug        => $Self->{Debug},
-                RootCI       => $Self->{ConfigItemID}[0],
-                DisplayedCIs => $Self->{DisplayedCIs},
-                DisplayedCIs => $Self->{DisplayedCIs},
-                Layout       => $Param{Layout} || 'dot',
-	);
-	return $Renderer->Render(
-	    TraceSteps => \@TraceSteps,
-	    OutputOptions => $Param{OutputOptions},
-	);
-    }
-    else {
-	# All other formats are provided by the external GraphViz renderer
-	my $Renderer = Kernel::System::CMDBExplorer::GraphVizRenderer->new(
-		Debug        => $Self->{Debug},
-                RootCI       => $Self->{ConfigItemID}[0],
-                DisplayedCIs => $Self->{DisplayedCIs},
-                DisplayedCIs => $Self->{DisplayedCIs},
-                Layout       => $Param{Layout} || 'dot',
-	);
-	return $Renderer->Render(
-	    TraceSteps    => \@TraceSteps,
-	    ClusterMap    => $Self->{Object2Scope},
-	    OutputFormat  => $OutputFormat,
-	    OutputOptions => $Param{OutputOptions},
-	);
-    }
+    my $Renderer = Kernel::System::CMDBExplorer::GraphVizRenderer->new(
+	Debug        => $Self->{Debug},
+        RootCI       => $Self->{ConfigItemID}[0],
+        DisplayedCIs => $Self->{DisplayedCIs},
+        DisplayedCIs => $Self->{DisplayedCIs},
+        Layout       => $Param{Layout} || 'dot',
+    );
+
+    return $Renderer->Render(
+        TraceSteps    => \@TraceSteps,
+	ClusterMap    => $Self->{Object2Scope},
+    );
 }
 
 ########################################################################

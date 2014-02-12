@@ -30,6 +30,15 @@
         </Setting>
     </ConfigItem>
 
+    <ConfigItem Name="CMDBExplorer::GraphOptions###DefaultLinkColor" Required="1" Valid="1">
+        <Description Translatable="1">Default link color (must be a valid graphviz color)</Description>
+        <Group>CMDBExplorer</Group>
+        <SubGroup>CMDBExplorer::GraphOptions</SubGroup>
+        <Setting>
+            <String>gray</String>
+        </Setting>
+    </ConfigItem>
+
     <ConfigItem Name="CMDBExplorer::GraphOptions###NodeShapes" Required="1" Valid="1">
         <Description Translatable="1">Defines the shapes (eg: box, ellipse, none) that will be user for rendering nodes in the explorer graph. Values must be valid graphviz node shape (see dot's man page).</Description>
         <Group>CMDBExplorer</Group>
@@ -76,6 +85,7 @@
         <Setting>
             <Hash>
                 <Item Key="bgcolor">transparent</Item>
+                <Item Key="rankdir">1</Item>
             </Hash>
         </Setting>
     </ConfigItem>
