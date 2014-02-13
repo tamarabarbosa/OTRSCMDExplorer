@@ -229,6 +229,7 @@
                                 <input type="hidden" name="Action" value="AgentITSMConfigItemZoom"/>
                                 <input type="hidden" name="ConfigItemID" value="$QData{"ConfigItemID"}"/>
                                 <input type="hidden" name="DisplayedCIs" value="$QData{"DisplayedCIs"}"/>
+                                <input type="hidden" name="IA" value="$QData{"IA"}"/>
                                 <label for="Layout">$Text{"Graph layout"}:</label>
                                 $Data{"LayoutStrg"}
                             </form>

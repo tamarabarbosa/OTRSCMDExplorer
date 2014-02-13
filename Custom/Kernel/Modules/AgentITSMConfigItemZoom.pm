@@ -370,6 +370,32 @@ sub Run {
     }
     $TraceParams{DisplayedCIs} =  \@DisplayedCIs;
     $TraceParams{Layout} = $Self->{ParamObject}->GetParam( Param => 'Layout' ) || 'dot';
+    $TraceParams{IA} = $Self->{ParamObject}->GetParam( Param => 'IA' ) || 0;
+
+    # Display Impact analysis menu
+    if ( $LastVersion->{CurInciStateType} ne 'operational' ) {
+        if ( ! $TraceParams{IA} ) {
+            $Self->{LayoutObject}->Block(
+                 Name => 'GraphMenuItem',
+                 Data => {
+                     Link        => 'Action=AgentITSMConfigItemZoom;ConfigItemID=' . $ConfigItemID . ';Layout=' . $TraceParams{Layout} . ';IA=1',
+                     MenuClass   => 'NoPopUp',
+                     Name        => 'Impact',
+                     Description => 'Show all impacted CIs',
+                 },
+            );
+        } else {
+            $Self->{LayoutObject}->Block(
+                 Name => 'GraphMenuItem',
+                 Data => {
+                     Link        => 'Action=AgentITSMConfigItemZoom;ConfigItemID=' . $ConfigItemID . ';Layout=' . $TraceParams{Layout} . ';IA=0',
+                     MenuClass   => 'NoPopUp',
+                     Name        => 'Regular',
+                     Description => 'Regular view',
+                 },
+            );
+        } 
+    }
 
     # Display graph layout selection field
     my $LayoutStrg = $Self->{LayoutObject}->BuildSelection(
@@ -389,14 +415,28 @@ sub Run {
          Data => {
              ConfigItemID => $ConfigItemID,
              DisplayedCIs => $Self->{ParamObject}->GetParam( Param => 'DisplayedCIs' ) || '',
+             IA           => $TraceParams{IA},
              LayoutStrg   => $LayoutStrg,
          },
     );
 
-    # Set default constraints (from ITSMTrace; dont known the exact purpose)
+    # Default trace constraints (Show all links and show only first-level children)
+    my $LinkTypes = '';
+    my $MaxTraceDepth = 1;
+    my $CompactTrace = 1;
+
+    # Does the agent requested Impact analysis?
+    if ( $TraceParams{IA} == 1 ) {
+        $LinkTypes = 'DependsOn';
+        $MaxTraceDepth = 0;
+        $CompactTrace = 0;
+    }
+
+    # Set Trace constraints (Still don't know the purpose of CompactTrace)
     $Tracer->SetConstraints( 
-        CompactTrace => 1,
-        MaxTraceDepth => 1,
+        CompactTrace => $CompactTrace,
+        MaxTraceDepth => $MaxTraceDepth,
+        LinkTypes => $LinkTypes,
     );
 
     # Create the graph
