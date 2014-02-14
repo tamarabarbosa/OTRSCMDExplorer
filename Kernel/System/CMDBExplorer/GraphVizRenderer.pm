@@ -303,6 +303,7 @@ sub _renderLink {
     $attrs{fontsize} = $Self->{GraphOptions}->{LinkFontSize} || 6;
     $attrs{color} =  $Self->{GraphOptions}->{LinkDefaultColor} || 'LightSteelBlue4';
     $attrs{fontcolor} =  $Self->{GraphOptions}->{LinkDefaultFontColor} || 'LightSteelBlue4';
+    $attrs{label} = $Link->{LinkType} if ($Self->{GraphOptions}->{DisplayLinksName});
 
     # Mark links between CI in non-operational state
     if ( $Link->{LinkType} eq 'DependsOn' ) {
@@ -319,7 +320,6 @@ sub _renderLink {
     # Add graphviz edge
     $Self->{GraphVizObject}->add_edge(
 	$Link->{Source}->GetKey => $Link->{Target}->GetKey,
-	label 		        => $Link->{LinkType},
         tooltip => $Link->{LinkType},
 	%attrs,
     );
