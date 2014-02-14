@@ -212,7 +212,7 @@
                 $Data{"LinkTableStrg"}
             </div>
 <!-- dtl:block:LinkTableComplex -->
-            <div class="Content">
+            <div class="Content SpacingTop">
                 <div class="ControlRow">
                     <h2>CMDB explorer</h2>
                 </div>
@@ -245,7 +245,7 @@
                     </ul>
 <!-- dtl:block:LinkGraph -->
                 </div>
-                    <div class="Content AutoHeight" style="overflow-x:scroll;vertical-align=middle;text-align=center">
+                    <div class="Content AutoHeight" style="overflow-x:auto;vertical-align=middle;text-align=center">
                         <img src="data:image/png;base64,$Data{"Content"}" usemap="#trace" style="display:table-cell;margin:0 auto;"/>
                         $Data{"Map"}
                     </div>

@@ -511,7 +511,9 @@ print STDERR "_followLinks: following an OUT-LINK\n";
 			Type => $LinkedClass,
 			ID => $ID
 		    );
-		    if (!$TargetObject)		# dead link?
+
+                    # Check for dead link
+		    if (!$TargetObject)	
 		    {
 			$Self->{LogObject}->Log(
 			    Priority => 'error',
@@ -519,8 +521,9 @@ print STDERR "_followLinks: following an OUT-LINK\n";
 			    	      . $Object->ToString()
 			    	      . " to non-existing object with id $ID.",
 			);
-			next;		# skip
-		    } #if
+			next;
+		    } 
+
 		    # Filter by attributes of object
 		    next unless $TargetObject->IsValid || $IncludeInvalidObjects;
 		    next unless $Self->_isObjectTypeAllowed($TargetObject);
