@@ -1,139 +1,130 @@
 =head1 NAME
 
-CMDBExplorer - trace links between services and config items
-
+CMDBExplorer - A graphical CMDB explorer using graphviz
 
 =head1 SYNOPSIS
 
-This OTRS package adds the capability to visualize relationships 
-between services and ITSM configuration items. 
+This OTRS package provides a graphical explorer to the OTRS CMDB.
 
-Relationships in OTRS are expressed
-by links that carry a certain semantic in their name (link type). 
-A set of useful link types is provided with ITSM, e.g.
-C<DependsOn> to indicate that a given service or config item (CI) depends 
-on another CI. The zoom view of OTRS allows to see links going to/from a
-service or CI at that level, but not beyond. B<CMDBExplorer> can show I<all> 
-links in and out of the current service/CI and follow them recursively within
-settable constraints (specific link types, specific CI types, recursion 
-depth, incident state, etc.). 
+It is based on the excellent work from Dietmar Berg, B<ITSMTrace> 
+(version 0.8.1).
 
-Graphical output is generated through the 
-open-source package C<graphviz> and can be accessed from within
-the web UI either for a single service/CI or for all of them. Automatic
-clustering helps to reduce the amount of information presented and improve
-the understandability of the generated images. Textual output is available 
-through a command-line interface.
+B<CMDBExplorer> differs from B<ITSMTrace> by the following characteristics:
 
+  1- The image generated is integrated in the AgentITSMConfigItemZoon screen;
+  2- The image initialy shows only first level links. But is interactive, so 
+     that the agent can click on a node/CI to further develop the 
+     vizualisation of the links;
+  3- A lot of CMDBExplorer parameters are configurable via SysConfig settings.
 
-=head1 DESCRIPTION
+=head1 SYSTEM REQUIREMENTS
 
-This section explains the basic concept behind the provided capabilities
-and some of the assumptions on which they rely. 
-Please see the perldoc of C<Kernel::System::CMDBExplorer> for details about
-option names and accepted values. 
+B<CMDBExplorer> has been tested on the following platform:
 
+  Ubuntu 12.04.4
+  OTRS framework 3.2.8
+  ITSM module 3.2.6
+  graphviz 2.26.3-10ubuntu1.1
+  libgraphviz-perl 2.04-1
 
-=head2 Data Model
+Please note that B<CMDBExplorer> will create new, customized,
+I<AgentITSMConfigItemZoom.pm> and I<AgentITSMConfigItemZoom.dtl> files. So 
+any existing changes on these files might get lost during the installation!
 
-In the context for which B<CMDBExplorer> has initially been developed, there
-is the need to model technical IT infrastructure with lots of applications.
-A "service" as exposed in OTRS typically has one or more associated CIs
-of type C<Technical Service> on which it depends. 
-The newly defined CI type C<Technical Service> is usually a server/service 
-process, something that "runs" and can be started/stopped and itself 
-depends on other CIs of type C<TechnicalService>, C<Computer>, C<Data> 
-(not in the default ITSM catalogue), or C<Software>. The granularity
-and extent of modeling is up to the user of this software.
+=head1 CONFIGURATION
 
-Example:
+=head2 CMDBExplorer::GraphOptions###DisplayLinksName
 
- % bin/otrs.CMDBExplorer.pl -CompactTrace -ServiceID 222
- OTRS [Service#222]
-  ->  <<DependsOn>>  OTRS for IS/IT [ITSMConfigItem::TechnicalService#103]
-    ->  <<DependsOn>>  ITSM 3.0.4 [ITSMConfigItem::Software#99]
-    ->  <<DependsOn>>  OTRS 3.0.9 [ITSMConfigItem::Software#98]
-    ->  <<DependsOn>>  MySQL Database "otrs3" [ITSMConfigItem::Data#97]
-      ->  <<DependsOn>>  MySQL Server [ITSMConfigItem::TechnicalService#100]
-        ->  <<DependsOn>>  atvievl5b364 [ITSMConfigItem::Computer#102]
-    ->  <<DependsOn>>  Apache httpd [ITSMConfigItem::TechnicalService#101]
-      ->  <<DependsOn>>  atvievl5b364 [ITSMConfigItem::Computer#102] (already visited)
+Whether links name should be displayed in the CMDB explorer graph or not
 
+=head2 CMDBExplorer::GraphOptions###RootNodeColor
 
-=head2 Object- and Link-Types
+Fillcolor of the Root node. The root node is the one that's currently displayed
+in the AgentITSMConfigItemZoom screen (must be a valid graphviz color).
 
-B<CMDBExplorer> wraps services and CIs as "objects" with a common interface, 
-their object types being C<Service>, C<ITSMConfigItem> and all CI subclasses,
-e.g. C<ITSMConfigItem::Computer>. These object types can be used to restrict
-the objects that are candidates to be shown on a trace.
+=head2 CMDBExplorer::GraphOptions###DisplayedNodeColor
 
-Recognized link types are those configured into OTRS+ITSM (C<DependsOn>, 
-C<AlternativeTo>, etc.) In addition, the pseudo link type C<ComposedOf> 
-is introduced to model the hierarchical decomposition of service objects.
-For directed links, only the "raw" link name (the "forward" direction) 
-is used, i.e. B<CMDBExplorer> only knows about C<DependsOn> but not about 
-its reverse display name C<RequiredBy>. Directed links are currently 
-all assumed to point "down" in some underlying hierarchy of things.
-Using a type of directed link that points "up" might work, but is 
-completely untested.
+Defines the fillcolor of the nodes that have been specificaly selected by the
+agent for inclusion in the graph (must be a valid graphviz color).
 
+=head2 CMDBExplorer::GraphOptions###LinkDefaultColor
 
-=head2 Constraints
+Default link color (must be a valid graphviz color)
 
-To keep images reasonably sized and understandable, constraints allow
-to focus on relevant information. It is possible to include only
-specific object- and link types in the output, or to limit it to show
-just objects with a non-operational I<IncidentState>. 
+=head2 CMDBExplorer::GraphOptions###LinkDefaultFontColor
 
-It is also possible to trim the trace by only following directed 
-links that point "down", and also stopping after following a
-non-directed link.
+Default link font's color when link labels are displayed (must be a valid 
+graphviz color).
 
+=head2 CMDBExplorer::GraphOptions###LinkFontSize
 
-=head2 Clustering
+Font size for the link labels (if displayed)
 
-To further enhance the understandability of the generated graph, 
-objects are graphically clustered (boxed) with a service that 
-depends on it.
-When the trace runs across a CI object that has a I<direct> 
-dependency link from a service that is I<not> a descendant of the 
-service that started the current cluster, the recursion is stopped 
-under the assumption that this is another well-known building 
-block.
+=head2 CMDBExplorer::GraphOptions###LinkStyles
 
-Example: 
+Defines the styles (eg: filled, dotted) that will be user for rendering links
+in the explorer graph. Values must be valid graphviz edge style (see dot's 
+man page).
 
-If the MySQL Server as in the example of the "Data Model" section 
-were a shared MySQL service with its own (unrelated) service entry, 
-the trace would stop after the cluster for the MySQL service.
+=head2 CMDBExplorer::GraphOptions###LinkArrows
 
+Defines which arrows must be drawn for links in the explorer graph. Values must 
+be valid graphviz edge dir (see dot's man page).
 
-=head2 Web User Interface
+=head2 CMDBExplorer::GraphOptions###NodeDefaultColor
 
-B<CMDBExplorer> is integrated with the web UI of OTRS in the areas
-"Service" and "CMDB". By default, there is one link to show a
-trace of all objects of the given type. This trace tends to
-become unreadable even with a moderate number of objects.
+Default node color (must be a valid graphviz color)
 
-The more valuable link is the one to show the trace for a single
-service or CI. By default, it comes with options configured to 
-show a "reasonable" subset of the available information. Typical 
-uses are to show the breakdown of a service into its constituent  
-CIs or to show the services that depend on a given CI to be 
-operational. 
+=head2 CMDBExplorer::GraphOptions###NodeDefaultFillColor
 
+Default node fillcolor (must be a valid graphviz color)
 
-=head2 Command Line Interface
+=head2 CMDBExplorer::GraphOptions###NodeFontSize
 
-For full access to all capabilities of generating a trace, 
-B<CMDBExplorer> also supplies a low-level command line interface 
-in the C<bin> directory. Output goes to the standard output.
+Font size for the node labels
 
+=head2 CMDBExplorer::GraphOptions###NodeShapes
 
-=head1 KNOWN PROBLEMS
+Defines the shapes (eg: box, ellipse, none) that will be user for rendering 
+nodes in the explorer graph. Values must be valid graphviz node shape (see 
+dot's man page).
 
-None yet.
+=head2 CMDBExplorer::GraphOptions::LayoutOptions###dot
 
+Defines rendering options for the 'dot' graphviz layout. Values must be valid graphviz 
+options for the selected layout (see dot's man page).
+
+=head2 CMDBExplorer::GraphOptions::LayoutOptions###neato
+
+Defines rendering options for the 'neato' graphviz layout. Values must be valid
+graphviz options for the selected layout (see dot's man page).
+
+=head2 CMDBExplorer::GraphOptions::LayoutOptions###twopi
+
+Defines rendering options for the 'twopi' graphviz layout. Values must be valid
+graphviz options for the selected layout (see dot's man page).
+
+=head2 CMDBExplorer::GraphOptions::LayoutOptions###circo
+
+Defines rendering options for the 'circo' graphviz layout. Values must be valid
+graphviz options for the selected layout (see dot's man page).
+
+=head2 CMDBExplorer::GraphOptions::LayoutOptions###fdp
+
+Defines rendering options for the 'fdp' graphviz layout. Values must be valid
+graphviz options for the selected layout (see dot's man page).
+
+=head2 CMDBExplorer::GraphOptions::LayoutOptions###sfdp
+
+Defines rendering options for the 'sfdp' graphviz layout. Values must be valid
+graphviz options for the selected layout (see dot's man page).
+
+=head1 PACKAGING
+
+B<CMDBExplorer> may easily be repackaged from its git repository by cloning it on
+a system running OTRS and issuing the following command:
+
+C<otrs.PackageManager.pl -a build -p /path/to/OTRSCMDBExplorer.sopm -d module-home-path>
 
 =head1 POSSIBLE FUTURE ENHANCEMENTS
 
@@ -142,24 +133,25 @@ worthwhile to be followed up.
 
 =over 4
 
-=item * Tuning of Graphviz Output
+=item * Test CMDBExplorer on different platforms
 
-As it is now, links tend to be drawn very close to each other, which
-makes it difficult to follow them. Any graphviz specialist that would
-volunteer to help out on this? (Need to somehow increase spacing 
-between "ranks" in graphviz).
+CMDBExplorer has only be tested on the OTRS 3.2.x framework with
+ITSMConfigurationManagement version 3.2.6, and should be tested on other 
+versions.
 
-=item * Access to more Information on the Web Page
+The installer will prevent you from installing B<CMDBExplorer> on other
+versions of the framework and ITSMConfigurationManagement module. This can be
+easily overcomed by repackaging it though (see chapter I<PACKAGING> here above).
 
-The graphical output is currently a single PNG file. Provisions are already
-there to generate an associated imagemap that displays additional information
-when hovering over an object. Any web-programmer familiar with multi-part
-output or such stuff volunteering to jump in?
+=item * Make CMDBExplorer more flexible with the version of the ITSMConfigurationManagement package needed. 
 
-=item * Allow Names for Services/CIs in Command-Line Interface
+B<CMDBExplorer> ships with a modified version of the I<AgentITSMConfigItemZoom.pm>
+and I<AgentITSMConfigItemZoom.dtl> files taken from ITSMConfigurationManagement
+version3.2.6. This makes it difficult to make B<CMDBExplorer> compatible with 
+other versions of the ITSMConfigurationManagement module.
 
-Currently services or CIs can only be specified by their ID
-which is not really user-friendly.
+A solution might be found by using the <CodeInstall> section of 
+the .sopm file.
 
 =item * Allow Trace Options to be selected in the Web UI
 
@@ -168,15 +160,13 @@ to reasonable values. This can be adapted through C<SysConfig>, but is
 static from an agent's point of view. It would be useful to have an 
 intermediate form page where the agent can individually select what 
 to include in the output or not.
- 
 
 =back
 
-
 =head1 TERMS AND CONDITIONS
 
-Copyright (C) 2014- Belnet, http://www.belnet.be
-Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
+ Copyright (C) 2014- Belnet, http://www.belnet.be E<10>
+ Copyright (C) 2011-2014 Thales Austria GmbH, http://www.thalesgroup.com/
 
 This software comes with ABSOLUTELY NO WARRANTY and WITHOUT ANY SUPPORT. 
 
@@ -185,11 +175,10 @@ For license information, see the enclosed file COPYING-CMDBExplorer
 If you did not receive this file, see 
 http://www.gnu.org/licenses/agpl-3.0.html.
 
-
 =head1 AUTHOR 
 
-cyrille.bollu@belnet.be
-dietmar.berg@thalesgroup.com
+ cyrille.bollu@belnet.be 
+ dietmar.berg@thalesgroup.com
 
 =cut
 
