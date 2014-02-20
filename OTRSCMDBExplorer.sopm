@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <otrs_package version="1.0">
     <Name>OTRSCMDBExplorer</Name>
-    <Version>0.0.4</Version>
+    <Version>0.0.5</Version>
     <Framework>3.2.x</Framework>
     <Vendor>Belnet</Vendor>
     <URL>http://belnet.be</URL>
     <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
-    <ChangeLog Version="0.0.2" Date="2014-02-12 10:17:00">Removed support for other OutputFormat than imgmap + Removed support for graph Clustering + Made various graph cosmetic enhancements (eg: links color now change depending on operational state of connected nodes + Changed actions of the nodes URL to make them more logical</ChangeLog>
-    <ChangeLog Version="0.0.2" Date="2014-02-12 10:17:00">Implemented first CMDBExplorer specific functionalities</ChangeLog>
+    <ChangeLog Version="0.0.5" Date="2014-02-14 14:09:00">Implemented impact analysis menu + fixed a bug related to the DisplayLinksName SysConfig parameter + 2 cosmetic changes in the .dtl</ChangeLog>
+    <ChangeLog Version="0.0.4" Date="2014-02-12 10:17:00">Removed support for other OutputFormat than imgmap + Removed support for graph Clustering + Made various graph cosmetic enhancements (eg: links color now change depending on operational state of connected nodes + Changed actions of the nodes URL to make them more logical</ChangeLog>
+    <ChangeLog Version="0.0.3" Date="2014-02-12 10:17:00">Implemented first CMDBExplorer specific functionalities</ChangeLog>
     <ChangeLog Version="0.0.2" Date="2014-02-11 15:41:00">Fixed a few ITSMTrace->CMDBExplorer renaming + Changed the EnableClustering setting to 0</ChangeLog>
     <ChangeLog Version="0.0.1" Date="2014-02-11 14:41:00">New package (forked from ITSMTrace-0.8.1)</ChangeLog>
     <Description Lang="en">A graphical CMDB explorer.</Description>
-    <PackageRequired Version="3.2.6">ITSMConfigurationManagement</PackageRequired>
+    <PackageRequired Version="3.2.3">ITSMConfigurationManagement</PackageRequired>
     <ModuleRequired Version="2.04">GraphViz</ModuleRequired>
     <Filelist>
         <File Permission="644" Location="COPYING-OTRSCMDBExplorer"></File>
