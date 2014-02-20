@@ -139,9 +139,10 @@ CMDBExplorer has only be tested on the OTRS 3.2.x framework with
 ITSMConfigurationManagement version 3.2.6, and should be tested on other 
 versions.
 
-The installer will prevent you from installing B<CMDBExplorer> on other
-versions of the framework and ITSMConfigurationManagement module. This can be
-easily overcomed by repackaging it though (see chapter I<PACKAGING> here above).
+The installer will prevent you from installing B<CMDBExplorer> on other versions of
+the framework and on versions of the ITSMConfigurationManagement module lower
+than 3.2.3. This can be easily overcomed by repackaging it though (see chapter 
+I<PACKAGING> here above).
 
 =item * Make CMDBExplorer more flexible with the version of the ITSMConfigurationManagement package needed. 
 
