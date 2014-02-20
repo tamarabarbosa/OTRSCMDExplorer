@@ -182,6 +182,7 @@ sub new
 	$Type = $1;
 	$ID = $2;
     } #if
+
     if ($Type ne 'Service' && $Type ne 'ITSMConfigItem')
     {
 	$Self->{LogObject}->Log( 
@@ -207,16 +208,15 @@ sub new
     return undef unless
 	   ($Type eq 'Service' && $Self->_loadService($ID))
 	|| ($Type eq 'ITSMConfigItem' && $Self->_loadITSMConfigItem($ID));
+
     # Save to cache
     $Self->{Key}  = $Key;
     $Self->{Type} = $Type;
     $Self->{ID}   = $ID;
     $ObjectInstances{$Key} = $Self;
+
     return $Self;
-} # new()
-#
-########################################################################
-
+} 
 
 ########################################################################
 #
@@ -254,9 +254,7 @@ sub _loadService
     $Self->{ServiceParentID} = $Service{ParentID};
     $Self->{CurInciState} = $Service{CurInciState};
     return $Self;
-} # _loadService()
-
-
+}
 
 # Load an ITSMConfigItem into a Kernel::System::CMDBExplorer::ObjectWrapper
 sub _loadITSMConfigItem
@@ -266,7 +264,7 @@ sub _loadITSMConfigItem
 	ConfigItemID => $ID,
 	Cache        => 1,
     );
-#    if (!$CI || !defined $CI->{Class}) 
+
     if (!$CI) 
     {
 	$Self->{LogObject}->Log( 
@@ -275,27 +273,30 @@ sub _loadITSMConfigItem
 	);
 	return undef;
     }
+
     # Get the "current version" of the CI
     my $Vers = $CI->{LastVersionID};
     my $CIVers = $Self->{ConfigItemObject}->VersionGet(
 	VersionID  => $Vers,
 	XMLDataGet => 0,    # (optional) default 1 (0|1)
     );
+
     # Save underlying object
     $Self->{ITSMConfigItem}->{LastVersion} = $CIVers;
+
     # Copy "interesting" values
     $Self->{Name} = $CIVers->{Name};
     $Self->{ShortName} = $CIVers->{Name};
     $Self->{FullType} = 'ITSMConfigItem::'.($CIVers->{Class}||'');
+
     # Define validity through deployment state
     $Self->{Valid} = defined $CI_VALID_DEPLOYMENT_STATES->{$CIVers->{CurDeplStateID}};
+
     # Get incident state
     $Self->{CurInciState} = $CIVers->{CurInciState};
+
     return $Self;
-} # _loadITSMConfigItem();
-#
-########################################################################
-
+} 
 
 ###  M e t h o d s  ####################################################
 #
@@ -370,10 +371,7 @@ sub ToString
 	   . $Self->GetID
 	   . ']'
 	   ;
-} # ToString()
-#
-########################################################################
-
+}
 
 ########################################################################
 #
@@ -385,15 +383,16 @@ For hierarchically nested services, these links are amended by pseudo
 links C<ComposedOf>.
 
 =cut
-
-# Get all links of this object
 sub GetLinkList
 {
     my $Self = shift;
+
     return { } unless $Self->IsValid;
+
     # Already loaded?
     my $LinkList = $Self->{LinkList};
     return $LinkList if $LinkList;
+
     # Load from DB, store in object
     $LinkList = $Self->{LinkObject}->LinkList(
 	Object    => $Self->{Type},	# table 'link_object'
@@ -401,6 +400,7 @@ sub GetLinkList
 	State     => 'Valid',
 	UserID    => 1,
     );
+
     # Special hack for 'Service': Expose decomposition as links
     if ($Self->{Type} eq 'Service')
     {

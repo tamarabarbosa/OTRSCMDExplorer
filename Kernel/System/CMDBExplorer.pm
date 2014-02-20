@@ -461,7 +461,6 @@ sub Trace
 
     return $Renderer->Render(
         TraceSteps    => \@TraceSteps,
-	ClusterMap    => $Self->{Object2Scope},
     );
 }
 
@@ -482,7 +481,6 @@ sub _followLinks {
     my $LinkList = $Object->GetLinkList;
     for my $LinkedClass (keys %$LinkList)
     {
-print STDERR "_followLinks: LinkedClass = $LinkedClass \n";
 	if ($LinkedClass eq 'Ticket')
 	{
 	    1;		# DEBUG: x %{$LinkList->{$LinkedClass}}	    
@@ -490,11 +488,8 @@ print STDERR "_followLinks: LinkedClass = $LinkedClass \n";
 	}
 	for my $LinkType (keys %{$LinkList->{$LinkedClass}})
 	{
-print STDERR "_followLinks: LinkType = $LinkType \n";
 	    next unless $Self->_isLinkTypeAllowed($LinkType);	# filtered?
 	    my $LinkDirType = $Self->{KnownLinkTypes}->{$LinkType};
-print STDERR "_followLinks: LinkDirType = $LinkDirType \n";
-	    next unless $Self->_isLinkTypeAllowed($LinkType);	# filtered?
 	    my $PosDelta = ( $LinkDirType eq '=' ? 0 : 1 );
 
 	    # Follow out-links
@@ -502,7 +497,6 @@ print STDERR "_followLinks: LinkDirType = $LinkDirType \n";
 	    # at or "below" the root obj and the link goes "down" or it is
 	    # a non-directed link
 	    if ( !$Self->{CompactTrace} || $PosDelta && ($Pos>=0) || !$PosDelta ) {
-print STDERR "_followLinks: following an OUT-LINK\n";
 		my @TargetIDs = 
 			keys %{$LinkList->{$LinkedClass}->{$LinkType}->{Target}};
 		for my $ID (@TargetIDs)
@@ -574,7 +568,6 @@ print STDERR "_followLinks: following an OUT-LINK\n";
 	    # at or "above" (<0) the root obj and the link goes "up" or it is
 	    # a non-directed link
 	    if ( !$Self->{CompactTrace} || $PosDelta && ( $Pos <= 0 ) || !$PosDelta ) {
-print STDERR "_followLinks: following an IN-LINK\n";
 		my @SourceIDs = keys %{$LinkList->{$LinkedClass}->{$LinkType}->{Source}};
 		for my $ID (@SourceIDs)
 		{
@@ -638,10 +631,10 @@ print STDERR "_followLinks: following an IN-LINK\n";
 	} #for
     } #for
     return \@TraceSteps;
-} # _followLinks()
+} 
 
-
-
+########################################################################
+#
 # Function that returns true if Scope2 is defined and contains 
 # at least one explicit scope ID that is not yet contained in 
 # any of the IDs in Scope1.
@@ -659,10 +652,7 @@ sub _isNewScope($$) {
 	return 1 unless $IDs1{$ID2};
     } #for
     return 0;
-} # _isNewScope()
-#
-########################################################################
-
+}
 
 ########################################################################
 #
@@ -733,10 +723,7 @@ sub _preloadScopes {
 	} #for
     } #while
     1;
-} # _preloadScopes()
-#
-########################################################################
-
+}
 
 ########################################################################
 #

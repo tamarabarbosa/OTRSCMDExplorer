@@ -127,19 +127,16 @@ the built-in mapping from objects & links to graphical elements.
 
     my $Output = $GraphVizRenderer->Render(
         TraceSteps	=> $TraceSteps,
-        ClusterMap 	=> $Object2Scope # (optional) (object-to-scope mapping)
     );
+
     # $Output->{png} now contains the PNG image of the graph, 
     # $Output->{map} contains the client-side image map for it.
-    # If output is requested in 'dot' format, this is returned
-    # as $Output->{dot}.
 
 =cut
 sub Render
 {
     my ($Self, %Param) = @_;
     my $TraceSteps   = $Param{TraceSteps} || [ ];
-    $Self->{ClusterMap} = $Param{ClusterMap} if exists $Param{ClusterMap};
 
     # Turn trace steps into (unique) nodes and edges
     my %Nodes;
@@ -149,7 +146,6 @@ sub Render
 	my $Object1 = $TraceStep->{Object1};
 	my $Object2 = $TraceStep->{Object2};
 	my $LinkDir = $TraceStep->{LinkDir};
-	my $LinkIsDirected = ($TraceStep->{LinkDirType} ne '=');
 	$Nodes{$Object2} = $Object2;	# get unique objs (obj2 is enough)
 
 	# Record all links as edges.
