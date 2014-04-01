@@ -371,8 +371,25 @@ sub Run {
     $TraceParams{DisplayedCIs} =  \@DisplayedCIs;
     $TraceParams{Layout} = $Self->{ParamObject}->GetParam( Param => 'Layout' ) || 'dot';
     $TraceParams{IA} = $Self->{ParamObject}->GetParam( Param => 'IA' ) || 0;
+    $TraceParams{Depth} = $Self->{ParamObject}->GetParam( Param => 'Depth' ) || 1;
 
-    # Display Impact analysis menu
+    # Default trace constraints (Show all links up to specified depth)
+    my $LinkTypes = '';
+    my $MaxTraceDepth = $TraceParams{Depth};
+
+    # Does the agent requested Impact analysis?
+    if ( $TraceParams{IA} == 1 ) {
+        $LinkTypes = 'DependsOn';
+        $MaxTraceDepth = 0;
+    }
+
+    # Set Trace constraints
+    $Tracer->SetConstraints(
+        MaxTraceDepth => $MaxTraceDepth,
+        LinkTypes => $LinkTypes,
+    );
+
+    # Display Impact analysis menu entry
     if ( $LastVersion->{CurInciStateType} ne 'operational' ) {
         if ( ! $TraceParams{IA} ) {
             $Self->{LayoutObject}->Block(
@@ -397,6 +414,29 @@ sub Run {
         } 
     }
 
+    # Display digging menu entries
+    $TraceParams{Depth}++;
+    $Self->{LayoutObject}->Block(
+         Name => 'GraphMenuItem',
+         Data => {
+             Link        => 'Action=AgentITSMConfigItemZoom;ConfigItemID=' . $ConfigItemID . ';Layout=' . $TraceParams{Layout} . ';IA=' . $TraceParams{IA} . ';Depth=' . $TraceParams{Depth},
+             MenuClass   => 'NoPopUp',
+             Name        => '+',
+             Description => 'Drill down in CMDB',
+         },
+     );
+    $TraceParams{Depth} -= 2;
+    $TraceParams{Depth} = 1 unless $TraceParams{Depth};
+    $Self->{LayoutObject}->Block(
+         Name => 'GraphMenuItem',
+         Data => {
+             Link        => 'Action=AgentITSMConfigItemZoom;ConfigItemID=' . $ConfigItemID . ';Layout=' . $TraceParams{Layout} . ';IA=' . $TraceParams{IA} . ';Depth=' . $TraceParams{Depth},
+             MenuClass   => 'NoPopUp',
+             Name        => '-',
+             Description => 'Drill up in CMDB',
+         },
+     );
+
     # Display graph layout selection field
     my $LayoutStrg = $Self->{LayoutObject}->BuildSelection(
          Name => 'Layout',
@@ -418,25 +458,6 @@ sub Run {
              IA           => $TraceParams{IA},
              LayoutStrg   => $LayoutStrg,
          },
-    );
-
-    # Default trace constraints (Show all links and show only first-level children)
-    my $LinkTypes = '';
-    my $MaxTraceDepth = 1;
-    my $CompactTrace = 1;
-
-    # Does the agent requested Impact analysis?
-    if ( $TraceParams{IA} == 1 ) {
-        $LinkTypes = 'DependsOn';
-        $MaxTraceDepth = 0;
-        $CompactTrace = 0;
-    }
-
-    # Set Trace constraints (Still don't know the purpose of CompactTrace)
-    $Tracer->SetConstraints( 
-        CompactTrace => $CompactTrace,
-        MaxTraceDepth => $MaxTraceDepth,
-        LinkTypes => $LinkTypes,
     );
 
     # Create the graph

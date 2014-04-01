@@ -229,10 +229,6 @@ to an object which initially starts a trace.
 	# Flag to trace only to/from objects with an incident (non-operational)
 	TraceIncident  => 0, 			# 0 | 1
 
-	# Flag to trace directed links only in a single direction and to stop
-	# recursion after a non-directed link to get a more compact trace
-	CompactTrace  => 0, 			# 0 | 1
-
 	# Number of "hops" to traverse; 0 = unlimited
 	MaxTraceDepth => 0,           		# >= 0
     );
@@ -296,8 +292,7 @@ sub SetConstraints {
     } #if
 
     for my $Key ( qw( IncludeInvalidObjects 
-	    	      TraceIncident 
-	    	      CompactTrace )) {
+	    	      TraceIncident )) {
 	if ( $Param{$Key} && $Param{$Key} !~ m{^[01]$} ) {
 	    $Self->{LogObject}->Log(
 		Priority => 'error',
@@ -496,7 +491,8 @@ sub _followLinks {
 	    # For "top-down flow", we only follow _directed_ outlinks if we are
 	    # at or "below" the root obj and the link goes "down" or it is
 	    # a non-directed link
-	    if ( !$Self->{CompactTrace} || $PosDelta && ($Pos>=0) || !$PosDelta ) {
+#	    if ( $PosDelta && ($Pos>=0) || !$PosDelta ) {
+	    if ( 1 ) {
 		my @TargetIDs = 
 			keys %{$LinkList->{$LinkedClass}->{$LinkType}->{Target}};
 		for my $ID (@TargetIDs)
@@ -543,11 +539,6 @@ sub _followLinks {
 		    # Check for end of recursion
 		    next if $Visited;		# already seen
 		    next if $Self->{MaxTraceDepth} && $Level >= $Self->{MaxTraceDepth};
-		    # Do not recurse if CompactTrace AND 
-		    #   (this is not a directed link OR this CI begins new scope)
-		    my $NewScope;
-		    next if $Self->{CompactTrace} && 
-		    	( !$PosDelta || (defined($NewScope) && $NewScope) );
 
 		    # Save link that we just traversed
 		    $Self->{VisitedLinks}->{$LinkSignature}++;
@@ -567,7 +558,8 @@ sub _followLinks {
 	    # For "top-down flow", we only follow _directed_ inlinks if we are
 	    # at or "above" (<0) the root obj and the link goes "up" or it is
 	    # a non-directed link
-	    if ( !$Self->{CompactTrace} || $PosDelta && ( $Pos <= 0 ) || !$PosDelta ) {
+#	    if ( $PosDelta && ( $Pos <= 0 ) || !$PosDelta ) {
+	    if ( 1 ) {
 		my @SourceIDs = keys %{$LinkList->{$LinkedClass}->{$LinkType}->{Source}};
 		for my $ID (@SourceIDs)
 		{
@@ -614,10 +606,7 @@ sub _followLinks {
 		    #   - no loop
 		    #   - no trace depth limit or within this limit
 		    #   - not top-down only or this was a directed link
-		    if (   ! $Visited 
-			&& (    ! $Self->{MaxTraceDepth} 
-			     || $Self->{MaxTraceDepth} && $Level < $Self->{MaxTraceDepth} )
-			&& ( ! $Self->{CompactTrace} || $PosDelta ))
+		    if ( ! $Visited && ( ! $Self->{MaxTraceDepth} || $Self->{MaxTraceDepth} && $Level < $Self->{MaxTraceDepth} ) )
 		    {
 			my $SubTraceSteps = $Self->_followLinks( 
 			    $SourceObject, 
@@ -632,98 +621,6 @@ sub _followLinks {
     } #for
     return \@TraceSteps;
 } 
-
-########################################################################
-#
-# Function that returns true if Scope2 is defined and contains 
-# at least one explicit scope ID that is not yet contained in 
-# any of the IDs in Scope1.
-# (Scope1 = source/predecessor, Scope2 = target/current)
-sub _isNewScope($$) {
-    my ($Scope1, $Scope2) = @_;
-    return undef if !defined($Scope1) && !defined($Scope2); # unknown
-    my @IDs2 = $Scope2->GetExplicitScopeIDs if defined $Scope2;
-    return 0 unless scalar @IDs2;	# nothing there, can't be new
-    my @IDs1 = $Scope1->GetAllScopeIDs if defined $Scope1;
-    return 1 unless scalar @IDs1;	# must be new if nothing there
-    my %IDs1;
-    $IDs1{$_}++ for @IDs1;
-    for my $ID2 ( @IDs2 ) {
-	return 1 unless $IDs1{$ID2};
-    } #for
-    return 0;
-}
-
-########################################################################
-#
-# Private method to create and populate scope objects for _all_
-# CIs that are explicitely or otherwise referenced from a service.
-#
-sub _preloadScopes {
-    my $Self = shift;
-
-    # Create scope objs for all CIs explicitly referenced
-    # from a service through a directed link as well as
-    # their referencing services
-    my @CIs;
-    for my $CI ( @{$Self->_expandConfigItemID(0) } ) {
-	my $ScopeObject = Kernel::System::CMDBExplorer::Scope->new();
-	$Self->{Object2Scope}->{$CI} = $ScopeObject;
-	my $LinkList = $CI->GetLinkList;
-	if ( exists $LinkList->{Service} ) {
-	    for my $LinkType ( keys %{$LinkList->{Service}} )
-	    {
-		# _directed_ in-links from services only
-		next if $Self->{KnownLinkTypes}->{$LinkType} eq '='; # not directed
-		next unless $Self->_isLinkTypeAllowed( $LinkType );  # not used
-		for my $SourceID ( keys %{$LinkList->{Service}->{$LinkType}->{Source}} ) {
-		    my $Service = Kernel::System::CMDBExplorer::ObjectWrapper->new(
-			%{$Self->_GetCommonObjects}, 
-			Type => 'Service',
-			ID => $SourceID,
-		    );
-		    next unless $Service->IsValid || $Self->{IncludeInvalidObjects};
-		    $ScopeObject->AddExplicitScopeID( ID => $SourceID );
-		    # Give the service the same explicit scope as the referenced CI
-		    my $SourceScopeObject =    $Self->{Object2Scope}->{$Service}
-					    || Kernel::System::CMDBExplorer::Scope->new();
-		    $Self->{Object2Scope}->{$Service} = $SourceScopeObject;
-		    $SourceScopeObject->AddExplicitScopeID( ID => $SourceID );
-		} #for
-		1;
-	    } #for
-	    push @CIs, $CI;	# save for further processing
-	} #if
-    } #for
-
-    # Recursively set scope for all indirectly referenced CIs
-    while (scalar @CIs ) {	# recursion unrolled into a loop (breadth first)
-	my $CI = shift @CIs;
-	my $ScopeObject = $Self->{Object2Scope}->{$CI};	# "parent" scope
-	my $LinkList = $CI->GetLinkList;
-	# Use only directed out-links to CIs
-	for my $LinkType ( keys %{$LinkList->{ITSMConfigItem}} )
-	{
-	    next if $Self->{KnownLinkTypes}->{$LinkType} eq '='; # not directed
-	    next unless $Self->_isLinkTypeAllowed( $LinkType );  # filtered away
-	    # Let each target CI inherit the scope IDs from the linking CI
-	    for my $TargetID ( keys %{$LinkList->{ITSMConfigItem}->{$LinkType}->{Target}} ) {
-		my $TargetCI = Kernel::System::CMDBExplorer::ObjectWrapper->new(
-		    %{$Self->_GetCommonObjects}, 
-		    Type => 'ITSMConfigItem',
-		    ID => $TargetID
-		);
-		next unless $TargetCI->IsValid || $Self->{IncludeInvalidObjects};
-		my $TargetScopeObject =    $Self->{Object2Scope}->{$TargetCI}
-				        || Kernel::System::CMDBExplorer::Scope->new();
-		$Self->{Object2Scope}->{$TargetCI} = $TargetScopeObject;
-		my $Added = $TargetScopeObject->InheritScope( Scope => $ScopeObject );
-		push @CIs, $TargetCI if $Added;	# save for (re-)processing
-	    } #for
-	} #for
-    } #while
-    1;
-}
 
 ########################################################################
 #
