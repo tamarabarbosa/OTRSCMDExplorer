@@ -240,6 +240,7 @@ sub _renderObject {
         # Tooltip init
 	my $Tooltip = $Type;
         $Tooltip =~ s/^.*:://; 
+        $Tooltip .= ': ';
         $Tooltip .= __escape($Object->GetName);
 
         # Change attributes depending on CI
