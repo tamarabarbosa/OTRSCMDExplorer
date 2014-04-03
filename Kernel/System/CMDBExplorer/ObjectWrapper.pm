@@ -281,6 +281,9 @@ sub _loadITSMConfigItem
 	XMLDataGet => 0,    # (optional) default 1 (0|1)
     );
 
+    # Dont' process CI with invalided class
+    $CIVers->{Class} || return undef;
+
     # Save underlying object
     $Self->{ITSMConfigItem}->{LastVersion} = $CIVers;
 

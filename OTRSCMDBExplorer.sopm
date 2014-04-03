@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <otrs_package version="1.0">
     <Name>OTRSCMDBExplorer</Name>
-    <Version>0.0.7</Version>
+    <Version>0.0.8</Version>
     <Framework>3.2.x</Framework>
     <Vendor>Belnet</Vendor>
     <URL>http://belnet.be</URL>
     <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
+    <ChangeLog Version="0.0.8" Date="2014-04-03 09:26:00">Prevent CMDBExplorer to show CI from invalided classes</ChangeLog>
     <ChangeLog Version="0.0.7" Date="2014-04-01 15:38:00">Implemented menu entries to dig into and outfrom the CMDB + removed all references to the unused CompactTrace setting</ChangeLog>
     <ChangeLog Version="0.0.5" Date="2014-02-14 14:09:00">Implemented impact analysis menu + fixed a bug related to the DisplayLinksName SysConfig parameter + 2 cosmetic changes in the .dtl</ChangeLog>
     <ChangeLog Version="0.0.4" Date="2014-02-12 10:17:00">Removed support for other OutputFormat than imgmap + Removed support for graph Clustering + Made various graph cosmetic enhancements (eg: links color now change depending on operational state of connected nodes + Changed actions of the nodes URL to make them more logical</ChangeLog>
