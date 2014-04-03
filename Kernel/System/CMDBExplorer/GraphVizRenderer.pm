@@ -235,7 +235,10 @@ sub _renderObject {
 
         # URL init
         my $url ='index.pl?Action=AgentITSMConfigItemZoom;ConfigItemID=';
-        my $urlDisplayedCIs .= ';DisplayedCIs=' . join(',' , @{ $Self->{DisplayedCIs} });
+        my $urlDisplayedCIs=';DisplayedCIs=';
+        if ( $Self->{DisplayedCIs} ) {
+            $urlDisplayedCIs .= join(',' , @{ $Self->{DisplayedCIs} });
+        }
 
         # Tooltip init
 	my $Tooltip = $Type;

@@ -66,19 +66,9 @@ my @_COMMON_OBJECTS = ( qw( ConfigObject LogObject MainObject
 
 =cut
 
-#
-########################################################################
-
-
-###  S t a t i c   M e t h o d s  ######################################
-#
-
 =item Kernel::System::CMDBExplorer::ObjectWrapper::Init()
-
 Static method to initialize the cache built into the class.
-
 =cut
-
 sub Init 
 { 
     delete $ObjectInstances{$_} for keys %ObjectInstances;
@@ -87,10 +77,8 @@ sub Init
 
 
 =item Kernel::System::CMDBExplorer::ObjectWrapper::GetAllInstances()
-
 Static method that returns all instances as HASHref, with keys
 I<ObjectType>#I<ID>.
-
 =cut
 
 sub GetAllInstances
@@ -98,16 +86,8 @@ sub GetAllInstances
     my $ClassOrSelf = shift;
     return \%ObjectInstances;
 } # GetAllInstances()
-#
-########################################################################
-
-
-
-###  C o n s t r u c t o r  ############################################
-#
 
 =item new()
-
 Returns an instance of an ObjectWrapper for an ITSM object.
 Instances are cached within this class; a call to the constructor
 is guaranteed to always return the same instance for a given
@@ -150,8 +130,6 @@ common objects and debug settings taken from there:
     );
 
 =cut
-
-
 sub new
 {
     my ($ClassOrType, %Param) = @_;
@@ -169,28 +147,28 @@ sub new
 	# Check required objects
 	for my $Obj ( @_COMMON_OBJECTS ) {
 	    $Self->{$Obj} = $Param{$Obj} || die "$Class->new(): Got no $Obj!";
-	} #for
-    } #else
+	}
+    }
 
     # Check required Type/ID
     my $Type = $Param{Type} || '';
     my $ID = $Param{ID} || '';
     my $Key = "$Type#$ID";
+
     if ($Type =~ /^([^#]+)#(\d+)$/)	# split combined key
     {
 	$Key = $Type;
 	$Type = $1;
 	$ID = $2;
-    } #if
+    }
 
-    if ($Type ne 'Service' && $Type ne 'ITSMConfigItem')
-    {
+    if ($Type ne 'Service' && $Type ne 'ITSMConfigItem') {
 	$Self->{LogObject}->Log( 
 	    Priority => 'error',
             Message  => "Unknown type '$Type'",
 	) unless $Type eq 'FAQ'; # known, but not [yet?] supported
 	return undef;
-    } #if
+    }
 
     # Try to reuse existing instance from cache
     my $Obj = $ObjectInstances{$Key};
@@ -205,9 +183,7 @@ sub new
     }
 
     # Load object from DB, through internal cache.
-    return undef unless
-	   ($Type eq 'Service' && $Self->_loadService($ID))
-	|| ($Type eq 'ITSMConfigItem' && $Self->_loadITSMConfigItem($ID));
+    return undef unless ($Type eq 'Service' && $Self->_loadService($ID)) || ($Type eq 'ITSMConfigItem' && $Self->_loadITSMConfigItem($ID));
 
     # Save to cache
     $Self->{Key}  = $Key;
@@ -218,27 +194,24 @@ sub new
     return $Self;
 } 
 
-########################################################################
-#
 # Private method to load an ITSM Service into a 
 # Kernel::System::CMDBExplorer::ObjectWrapper
-#
 #     $ObjectWrapper->_loadService( $ID );
-#
 sub _loadService
 {
     my ($Self, $ID) = @_;
     my $ServiceName = $Self->{ServiceObject}->ServiceLookup(
 	ServiceID => $ID,
     );
-    if (!$ServiceName) 
-    {
+
+    if (!$ServiceName) {
 	$Self->{LogObject}->Log( 
 	    Priority => 'error',
             Message  => "Cannot load Service #$ID",
 	);
 	return undef;
     }
+
     my %Service = $Self->{ServiceObject}->ServiceGet(
 	ServiceID => $ID,
 	UserID    => 1,
@@ -246,6 +219,7 @@ sub _loadService
 
     # Save underlying object
     $Self->{Service} = \%Service;
+
     # Copy "interesting" values
     $Self->{Valid} = ($Service{ValidID} == $SERVICE_VALID_ID);
     $Self->{Name} = $Service{Name};
@@ -253,6 +227,7 @@ sub _loadService
     $Self->{FullType} = 'Service';
     $Self->{ServiceParentID} = $Service{ParentID};
     $Self->{CurInciState} = $Service{CurInciState};
+
     return $Self;
 }
 

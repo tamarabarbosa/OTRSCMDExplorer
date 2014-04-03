@@ -230,6 +230,7 @@
                                 <input type="hidden" name="ConfigItemID" value="$QData{"ConfigItemID"}"/>
                                 <input type="hidden" name="DisplayedCIs" value="$QData{"DisplayedCIs"}"/>
                                 <input type="hidden" name="IA" value="$QData{"IA"}"/>
+                                <input type="hidden" name="Depth" value="$QData{"Depth"}"/>
                                 <label for="Layout">$Text{"Graph layout"}:</label>
                                 $Data{"LayoutStrg"}
                             </form>

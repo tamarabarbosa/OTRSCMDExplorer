@@ -89,12 +89,6 @@ Creates an object.
 
 =cut
 
-# List of OTRS common objs required for this class to function
-my @_COMMON_OBJECTS = ( qw( ConfigObject LogObject MainObject 
-			    DBObject EncodeObject 
-			    ConfigItemObject GeneralCatalogObject 
-			    LinkObject ServiceObject ) );
-
 sub new {
     my ( $ClassOrType, %Param ) = @_;
 
@@ -104,35 +98,25 @@ sub new {
     bless( $Self, $Class );
 
     # check needed objects
-    for my $Obj ( @_COMMON_OBJECTS ) {
-        $Self->{$Obj} = $Param{$Obj} || die "$Class->new(): Got no $Obj!";
+    for my $Object ( qw( ConfigObject LogObject MainObject DBObject EncodeObject ) ) {
+        $Self->{$Object} = $Param{$Object} || die "$Class->new(): Got no $Object!";
     }
+
+    # create additional objects if needed
+    $Self->{GeneralCatalogObject} = $Param{GeneralCatalogObject} || Kernel::System::GeneralCatalog->new( %{$Self} );
+    $Self->{ConfigItemObject} = $Param{ConfigItemObject} || Kernel::System::ITSMConfigItem->new( %{$Self} );
+    $Self->{ServiceObject} = $Param{ServiceObject} || Kernel::System::Service->new( %{$Self} );
+    $Self->{LinkObject} = $Param{LinkObject} || Kernel::System::LinkObject->new( %{$Self} );
+
 
     # Get debug setting through config, overriden by parameter
     $Self->{Debug} = $Self->{ConfigObject}->{'CMDBExplorer::Debug'} || 0;
     $Self->{Debug} = $Param{Debug} if defined $Param{Debug};
 
     return $Self;
-} # new()
-
-
-
-# Internal accessor method that returns all required OTRS common objects
-# (and debug settings) as HASH-ref to facilitate construction of a new 
-# object based on an existing one.
-sub _GetCommonObjects
-{
-    my $Self = shift;
-    my %CommonObjects;
-    $CommonObjects{$_} = $Self->{$_} for ( @_COMMON_OBJECTS, 'Debug' );
-    return \%CommonObjects;
-} # _GetCommonObjects()
-
-###  M e t h o d s  ####################################################
-#
+} 
 
 =item GetKnownLinkTypes()
-
 Gets I<all> known link types that may exist between different objects.
 For the purpose of link tracing and visualization, the hierarchical 
 decomposition of services is modelled as the pseudo link type 
@@ -145,7 +129,6 @@ dependency link used for incident state propagation, or '+' for the
 pseudo decomposition link.
 
     my $HashRef = $TraceObject->GetKnownLinkTypes();
-
 =cut
 sub GetKnownLinkTypes
 {
@@ -165,7 +148,6 @@ sub GetKnownLinkTypes
 }
 
 =item GetKnownObjectTypes()
-
 Gets I<all> known "object" types for the purpose of setting constraints
 for link tracing and visualization. 
 Currently these are C<Service>, C<ITSMConfigItem> and refinements of it
@@ -173,7 +155,6 @@ in the form C<ITSMConfigItem::I<Class>>.
 Object types are returned as the keys of a HASHref for use as lookup table.
 
     my $HashRef = $TraceObject->GetKnownObjectTypes();
-
 =cut
 sub GetKnownObjectTypes
 {
@@ -192,11 +173,7 @@ sub GetKnownObjectTypes
     return \%KnownObjectTypes;
 }
     
-########################################################################
-#
-
 =item SetConstraints()
-
 The extent of a trace can be controlled by filtering ITSM object- 
 and link-types as well as by setting one of the other constraints
 shown below.
@@ -235,7 +212,6 @@ to an object which initially starts a trace.
 
 If anything goes wrong, the method logs an error and returns C<undef>, 
 otherwise it returns 1.
-
 =cut
 sub SetConstraints {    
     my ( $Self, %Param ) = @_;
@@ -662,13 +638,13 @@ sub _renderAsText {
 sub _expandServiceID {
     my ($Self, $ServiceID) = @_;
 
-    return [ ] unless @{ $ServiceID }[0] ne '';
+    return [ ] unless $ServiceID;
 
     my @Objects;
     if ($ServiceID > 0) {
 	# Single service, try to load it
 	my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
-	    %{$Self->_GetCommonObjects}, 
+	    %{$Self}, 
 	    Type => 'Service', 
 	    ID => $Self->{ServiceID}
 	);
@@ -681,7 +657,7 @@ sub _expandServiceID {
 	);
 	for my $ID ( keys %ServiceList ) {
 	    my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
-		%{$Self->_GetCommonObjects}, 
+		%{$Self}, 
 		Type => 'Service', 
 		ID => $ID,
 	    );
@@ -713,7 +689,7 @@ sub _expandConfigItemID {
         if ($CI != 0) {
             # Single config item, try to load it
 	    my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
-	        %{$Self->_GetCommonObjects}, 
+	        %{$Self}, 
  	        Type => 'ITSMConfigItem', 
 	        ID => $CI,
 	    );
@@ -727,7 +703,7 @@ sub _expandConfigItemID {
 	    my $IncludeInvalidObjects = $Self->{IncludeInvalidObjects};
 	    for my $ID ( @{$ConfigItemList} ) {
 	        my $Object = Kernel::System::CMDBExplorer::ObjectWrapper->new(
-		    %{$Self->_GetCommonObjects}, 
+		    %{$Self}, 
 		    Type => 'ITSMConfigItem', 
 		    ID => $ID,
 	        );
@@ -736,14 +712,12 @@ sub _expandConfigItemID {
 	        next unless $Self->_isObjectTypeAllowed($Object);
 	        push (@Objects, $Object);
 	    } 
-        } #else
-    } #foreach
+        } 
+    }
 
     return \@Objects;
 } 
 
-########################################################################
-#
 # Private method to check if a given link type meets the current constraints
 sub _isLinkTypeAllowed {
     my ($Self, $LinkType) = @_;
@@ -758,8 +732,6 @@ sub _isLinkTypeAllowed {
     return 0;
 }
 
-########################################################################
-#
 # Private method to check if a given object meets the current
 # type constraints
 sub _isObjectTypeAllowed {
@@ -777,8 +749,6 @@ sub _isObjectTypeAllowed {
     return 0;
 }
 
-########################################################################
-#
 # Private method to check if a given object meets the current 
 # incident state constraints (when following only "hot" links)
 sub _isObjectInciStateAllowed {

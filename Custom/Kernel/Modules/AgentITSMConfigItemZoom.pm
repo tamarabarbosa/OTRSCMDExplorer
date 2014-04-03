@@ -20,7 +20,6 @@ use Kernel::System::LinkObject;
 
 ###### OTRSCMDBExplorer ######
 use Kernel::System::CMDBExplorer;
-use Kernel::System::Service;
 use MIME::Base64;
 ###### OTRSCMDBExplorer ######
 
@@ -43,10 +42,6 @@ sub new {
     $Self->{GeneralCatalogObject} = Kernel::System::GeneralCatalog->new(%Param);
     $Self->{ConfigItemObject}     = Kernel::System::ITSMConfigItem->new(%Param);
     $Self->{LinkObject}           = Kernel::System::LinkObject->new(%Param);
-
-###### OTRSCMDBExplorer ######
-    $Self->{ServiceObject} = Kernel::System::Service->new(%Param);
-###### OTRSCMDBExplorer ######
 
     # get config of frontend module
     $Self->{Config} = $Self->{ConfigObject}->Get("ITSMConfigItem::Frontend::$Self->{Action}");
@@ -377,7 +372,7 @@ sub Run {
     my $LinkTypes = '';
     my $MaxTraceDepth = $TraceParams{Depth};
 
-    # Does the agent requested Impact analysis?
+    # Does the agent requested impact analysis?
     if ( $TraceParams{IA} == 1 ) {
         $LinkTypes = 'DependsOn';
         $MaxTraceDepth = 0;
@@ -456,6 +451,7 @@ sub Run {
              ConfigItemID => $ConfigItemID,
              DisplayedCIs => $Self->{ParamObject}->GetParam( Param => 'DisplayedCIs' ) || '',
              IA           => $TraceParams{IA},
+             Depth        => $MaxTraceDepth,
              LayoutStrg   => $LayoutStrg,
          },
     );
