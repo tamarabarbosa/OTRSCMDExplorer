@@ -1,8 +1,6 @@
 # --
 # Kernel/Modules/AgentITSMConfigItemZoom.pm - the OTRS ITSM config item zoom module
-# Copyright (C) 2001-2013 OTRS AG, http://otrs.org/
-# --
-# $Id: AgentITSMConfigItemZoom.pm,v 1.15 2013/03/26 14:34:27 ub Exp $
+# Copyright (C) 2001-2014 OTRS AG, http://otrs.com/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -22,9 +20,6 @@ use Kernel::System::LinkObject;
 use Kernel::System::CMDBExplorer;
 use MIME::Base64;
 ###### OTRSCMDBExplorer ######
-
-use vars qw($VERSION);
-$VERSION = qw($Revision: 1.15 $) [1];
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -200,16 +195,14 @@ sub Run {
     # output version tree
     for my $VersionHash ( @{$VersionList} ) {
 
-        my %UserInfo = $Self->{UserObject}->GetUserData(
+        $Param{CreateByUserFullName} = $Self->{UserObject}->UserName(
             UserID => $VersionHash->{CreateBy},
-            Cached => 1,
         );
 
         $Self->{LayoutObject}->Block(
             Name => 'TreeItem',
             Data => {
                 %Param,
-                %UserInfo,
                 %{$ConfigItem},
                 %{$VersionHash},
                 Count      => $Counter,
@@ -295,22 +288,11 @@ sub Run {
         );
     }
 
-    # get create user data
-    my %CreateUser = $Self->{UserObject}->GetUserData(
-        UserID => $ConfigItem->{CreateBy},
-        Cached => 1,
-    );
-    for my $Postfix (qw(UserLogin UserFirstname UserLastname)) {
-        $ConfigItem->{ 'Create' . $Postfix } = $CreateUser{$Postfix};
-    }
-
-    # get change user data
-    my %ChangeUser = $Self->{UserObject}->GetUserData(
-        UserID => $ConfigItem->{ChangeBy},
-        Cached => 1,
-    );
-    for my $Postfix (qw(UserLogin UserFirstname UserLastname)) {
-        $ConfigItem->{ 'Change' . $Postfix } = $ChangeUser{$Postfix};
+    # get create & change user data
+    for my $Key (qw(Create Change)) {
+        $ConfigItem->{ $Key . 'ByUserFullName' } = $Self->{UserObject}->UserName(
+            UserID => $ConfigItem->{ $Key . 'By' },
+        );
     }
 
     # output meta block

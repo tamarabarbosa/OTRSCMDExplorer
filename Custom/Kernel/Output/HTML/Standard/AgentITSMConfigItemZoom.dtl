@@ -1,8 +1,6 @@
 # --
 # AgentITSMConfigItemZoom.dtl - provides HTML form for AgentITSMConfigItemZoom
-# Copyright (C) 2001-2012 OTRS AG, http://otrs.org/
-# --
-# $Id: AgentITSMConfigItemZoom.dtl,v 1.28 2012/11/30 17:10:41 ub Exp $
+# Copyright (C) 2001-2014 OTRS AG, http://otrs.com/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -50,7 +48,7 @@
                         <div class="Clear"></div>
                         <label>$Text{"Created by"}:</label>
                         <p class="Value">
-                            $QData{"CreateUserFirstname"} $QData{"CreateUserLastname"}
+                            $QData{"CreateByUserFullName"}
                         </p>
                         <div class="Clear"></div>
                         <label>$Text{"Last changed"}:</label>
@@ -58,7 +56,7 @@
                         <div class="Clear"></div>
                         <label>$Text{"Last changed by"}:</label>
                         <p class="Value">
-                            $QData{"ChangeUserFirstname"} $QData{"ChangeUserLastname"}
+                            $QData{"ChangeByUserFullName"}
                         </p>
                         <div class="Clear"></div>
                     </fieldset>
@@ -87,28 +85,28 @@
                     <li>
                         <a href="$Env{"Baselink"}$Data{"Link"}" class="$QData{"MenuClass"}" title="$Text{"$Data{"Description"}"}">$Text{"$Data{"Name"}"}</a>
                     </li>
-<!-- dtl:block:MenuItem --> 
+<!-- dtl:block:MenuItem -->
 <!-- dtl:block:Menu -->
                 </ul>
             </div>
             <div id="ITSMTree">
 <!-- dtl:block:Tree -->
-                <div id="ITSMTable"  class="FixedHeader">
+                <div id="ITSMTable"  class="TicketList">
                     <div class="ControlRow">
                         <div class="ITSMItemView Icons">
 <!-- dtl:block:Expand -->
-                            <a class="OneITSMItem Active" href="$Env{"Baselink"}Action=AgentITSMConfigItemZoom;ConfigItemID=$LQData{"ConfigItemID"};ShowVersions=0" title="$Text{"Show one version"}"><span>$Text{"Show one version"}</span></a>
-                            <a class="AllITSMItems" href="$Env{"Baselink"}Action=AgentITSMConfigItemZoom;ConfigItemID=$LQData{"ConfigItemID"};ShowVersions=1" title="$Text{"Show all versions"}"><span>$Text{"Show all versions"}</span></a>
+                            <a class="OneITSMItem Active" href="$Env{"Baselink"}Action=AgentITSMConfigItemZoom;ConfigItemID=$LQData{"ConfigItemID"};ShowVersions=0" title="$Text{"Show one version"}"><i class="icon-minus"></i><span>$Text{"Show one version"}</span></a>
+                            <a class="AllITSMItems" href="$Env{"Baselink"}Action=AgentITSMConfigItemZoom;ConfigItemID=$LQData{"ConfigItemID"};ShowVersions=1" title="$Text{"Show all versions"}"><i class="icon-reorder"></i><span>$Text{"Show all versions"}</span></a>
 <!-- dtl:block:Expand -->
 <!-- dtl:block:Collapse -->
-                            <a class="OneITSMItem" href="$Env{"Baselink"}Action=AgentITSMConfigItemZoom;ConfigItemID=$LQData{"ConfigItemID"};ShowVersions=0" title="$Text{"Show one version"}"><span>$Text{"Show one version"}</span></a>
-                            <a class="AllITSMItems Active" href="$Env{"Baselink"}Action=AgentITSMConfigItemZoom;ConfigItemID=$LQData{"ConfigItemID"};ShowVersions=1" title="$Text{"Show all versions"}"><span>$Text{"Show all versions"}</span></a>
+                            <a class="OneITSMItem" href="$Env{"Baselink"}Action=AgentITSMConfigItemZoom;ConfigItemID=$LQData{"ConfigItemID"};ShowVersions=0" title="$Text{"Show one version"}"><i class="icon-minus"></i><span>$Text{"Show one version"}</span></a>
+                            <a class="AllITSMItems Active" href="$Env{"Baselink"}Action=AgentITSMConfigItemZoom;ConfigItemID=$LQData{"ConfigItemID"};ShowVersions=1" title="$Text{"Show all versions"}"><i class="icon-reorder"></i><span>$Text{"Show all versions"}</span></a>
 <!-- dtl:block:Collapse -->
                         </div>
                     </div>
                     <div id="ITSMTableBody" class="ActionRow">
                         <div class="Scroller">
-                            <table id="FixedTable" class="TableSmall">
+                            <table class="TableSmall">
                                 <thead>
                                     <tr>
                                         <th><span>$Text{"Version Incident State"}</span></th>
@@ -135,7 +133,7 @@
                                             </a>
                                         </td>
                                         <td>
-                                            $QData{"UserLogin","30"} ($Quote{"$Data{"UserFirstname"} $Data{"UserLastname"}","30"})
+                                            $QData{"CreateByUserFullName"}
                                         </td>
                                         <td>
                                             $TimeLong{"$QData{"CreateTime"}"}
@@ -155,7 +153,7 @@
             <div id="ITSMItems">
                 <div class="WidgetBox SpacingTop Expanded">
                     <div class="LightRow Header">
-                        <div class="WidgetAction Toggle"><a href="#" title="$Text{"Show or hide the content."}"><span></span></a></div>
+                        <div class="WidgetAction Toggle"><a href="#" title="$Text{"Show or hide the content."}"><i class="icon-caret-right"></i><i class="icon-caret-down"></i></a></div>
                         <h2>$Text{"Configuration Item Version Details"}</h2>
                     </div>
                     <div class="WithPadding Content NoDoubleBorders">

@@ -22,8 +22,8 @@ B<CMDBExplorer> differs from B<ITSMTrace> by the following characteristics:
 B<CMDBExplorer> has been tested on the following platform:
 
   Ubuntu 12.04.4
-  OTRS framework 3.2.8
-  ITSM module 3.2.6
+  OTRS framework 3.2.8 with ITSM module 3.2.6 (for CMDBExplorer version <=0.8)
+  OTRS framework 3.3.9 with ITSM module 3.3.11 (for CMDBExplorer versions 3.3.x)
   graphviz 2.26.3-10ubuntu1.1
   libgraphviz-perl 2.04-1
 
