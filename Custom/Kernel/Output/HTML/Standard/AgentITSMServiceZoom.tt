@@ -43,11 +43,7 @@
 
                         <label>[% Translate("Created by") | html %]:</label>
                         <p class="Value">
-<<<<<<< HEAD:Custom/Kernel/Output/HTML/Standard/AgentITSMServiceZoom.dtl
-                            $QData{"CreateByName"}
-=======
                             [% Data.CreateUserFirstname | html %] [% Data.CreateUserLastname | html %]
->>>>>>> 22e419c... Migrated template files to new Template::Toolkit syntax.:Custom/Kernel/Output/HTML/Standard/AgentITSMServiceZoom.tt
                         </p>
                         <div class="Clear"></div>
 
@@ -59,11 +55,7 @@
 
                         <label>[% Translate("Last changed by") | html %]:</label>
                         <p class="Value">
-<<<<<<< HEAD:Custom/Kernel/Output/HTML/Standard/AgentITSMServiceZoom.dtl
-                            $QData{"ChangeByName"}
-=======
                             [% Data.ChangeUserFirstname | html %] [% Data.ChangeUserLastname %]
->>>>>>> 22e419c... Migrated template files to new Template::Toolkit syntax.:Custom/Kernel/Output/HTML/Standard/AgentITSMServiceZoom.tt
                         </p>
                         <div class="Clear"></div>
                     </fieldset>
@@ -98,13 +90,8 @@
 
             <div class="WidgetBox SpacingTop Expanded">
                 <div class="LightRow Header">
-<<<<<<< HEAD:Custom/Kernel/Output/HTML/Standard/AgentITSMServiceZoom.dtl
-                    <div class="WidgetAction Toggle"><a href="#" title="$Text{"Show or hide the content."}"><i class="icon-caret-right"></i><i class="icon-caret-down"></i></a></div>
-                    <h2>$Text{"Service"}: $QData{"Name"}</h2>
-=======
                     <div class="WidgetAction Toggle"><a href="#" title="[% Translate("Show or hide the content.") | html %]"><span></span></a></div>
                     <h2>[% Translate("Service") | html %]: [% Data.Name | html %]</h2>
->>>>>>> 22e419c... Migrated template files to new Template::Toolkit syntax.:Custom/Kernel/Output/HTML/Standard/AgentITSMServiceZoom.tt
                 </div>
                 <div class="Content AutoHeight">
                     <fieldset class="TableLike FixedLabelSmall">
@@ -189,12 +176,7 @@
                         </li>
 [% RenderBlockEnd("GraphLayout") %]
                     </ul>
-<<<<<<< HEAD:Custom/Kernel/Output/HTML/Standard/AgentITSMServiceZoom.dtl
-<!-- dtl:block:LinkGraph -->
-
-=======
 [% RenderBlockStart("LinkGraph") %]
->>>>>>> 22e419c... Migrated template files to new Template::Toolkit syntax.:Custom/Kernel/Output/HTML/Standard/AgentITSMServiceZoom.tt
                 </div>
                     <div class="Content AutoHeight" style="overflow-x:auto;vertical-align=middle;text-align=center">
                         <img src="data:image/png;base64,[% Data.Content %]" usemap="#trace" style="display:table-cell;margin:0 auto;"/>

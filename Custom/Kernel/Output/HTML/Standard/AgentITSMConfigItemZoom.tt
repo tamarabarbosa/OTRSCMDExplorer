@@ -255,18 +255,18 @@
                     <ul class="Actions">
 [% RenderBlockStart("GraphMenuItem") %]
                         <li>
-                            <a href="[% Env{"Baselink"} %][% Data.Link %]" class="[% Data.MenuClass | html %]" title="[% Translate(Data.Description) | html %]">[% Data.Name | html %]</a>
+                            <a href="[% Env("Baselink") %][% Data.Link %]" class="[% Data.MenuClass | html %]" title="[% Translate(Data.Description) | html %]">[% Data.Name | html %]</a>
                         </li>
 [% RenderBlockEnd("GraphMenuItem") %]
 [% RenderBlockStart("GraphLayout") %]
                         <li>
-                            <form title="[% Translate("Change graph layout") %]" action="[% $Env{"CGIHandle") %]" method="get">
+                            <form title="[% Translate("Change graph layout") %]" action="[% $Env("CGIHandle") %]" method="get">
                                 <input type="hidden" name="Action" value="AgentITSMConfigItemZoom"/>
                                 <input type="hidden" name="ConfigItemID" value="[% Data.ConfigItemID | html %]"/>
                                 <input type="hidden" name="DisplayedCIs" value="[% Data.DisplayedCIs | html %]"/>
                                 <input type="hidden" name="IA" value="[% Data.IA | html %]"/>
                                 <input type="hidden" name="Depth" value="[% Data.Depth | html %]"/>
-                                <label for="Layout">[% Translate("Graph layout"} | html %]</label>
+                                <label for="Layout">[% Translate("Graph layout") | html %]</label>
                                 [% Data.LayoutStrg %]
                             </form>
 <!-- dtl:js_on_document_complete -->

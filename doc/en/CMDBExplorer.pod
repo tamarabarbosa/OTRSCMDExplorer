@@ -21,11 +21,21 @@ B<CMDBExplorer> differs from B<ITSMTrace> by the following characteristics:
 
 B<CMDBExplorer> has been tested on the following platform:
 
-  Ubuntu 12.04.4
-  OTRS framework 3.2.8 with ITSM module 3.2.6 (for CMDBExplorer version <=0.8)
-  OTRS framework 3.3.9 with ITSM module 3.3.11 (for CMDBExplorer versions 3.3.x)
-  graphviz 2.26.3-10ubuntu1.1
-  libgraphviz-perl 2.04-1
+  For CMDBExplorer versions 4.0.x:
+    OTRS framework 4.0.7 with ITSM module 4.0.7
+    Ubuntu 14.04.22
+    graphviz 2.36.0-0ubuntu3.1
+    libgraphviz-perl 2.14-1
+  For CMDBExplorer versions 3.3.x:
+    OTRS framework 3.3.9 with ITSM module 3.3.11
+    Ubuntu 12.04.4
+    graphviz 2.26.3-10ubuntu1.1
+    libgraphviz-perl 2.04-1
+  For CMDBExplorer version <=0.8
+    OTRS framework 3.2.8 with ITSM module 3.2.6 
+    Ubuntu 12.04.4
+    graphviz 2.26.3-10ubuntu1.1
+    libgraphviz-perl 2.04-1
 
 Please note that B<CMDBExplorer> will create new, customized,
 I<AgentITSMConfigItemZoom.pm> and I<AgentITSMConfigItemZoom.dtl> files. So 
