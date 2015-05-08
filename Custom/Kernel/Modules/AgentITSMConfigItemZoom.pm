@@ -1,6 +1,6 @@
 # --
 # Kernel/Modules/AgentITSMConfigItemZoom.pm - the OTRS ITSM config item zoom module
-# Copyright (C) 2001-2014 OTRS AG, http://otrs.com/
+# Copyright (C) 2001-2015 OTRS AG, http://otrs.com/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -125,6 +125,7 @@ sub Run {
 
             # load module
             if ( $Self->{MainObject}->Require( $Menus{$Menu}->{Module} ) ) {
+
                 my $Object = $Menus{$Menu}->{Module}->new(
                     %{$Self},
                     ConfigItemID => $Self->{ConfigItemID},
@@ -174,6 +175,54 @@ sub Run {
         incident    => 'redled',
     );
 
+    # to store the color for the deployment states
+    my %DeplSignals;
+
+    # get list of deployment states
+    my $DeploymentStatesList = $Self->{GeneralCatalogObject}->ItemList(
+        Class => 'ITSM::ConfigItem::DeploymentState',
+    );
+
+    # set deployment style colors
+    my $StyleClasses = '';
+
+    ITEMID:
+    for my $ItemID ( sort keys %{$DeploymentStatesList} ) {
+
+        # get deployment state preferences
+        my %Preferences = $Self->{GeneralCatalogObject}->GeneralCatalogPreferencesGet(
+            ItemID => $ItemID,
+        );
+
+        # check if a color is defined in preferences
+        next ITEMID if !$Preferences{Color};
+
+        # get deployment state
+        my $DeplState = $DeploymentStatesList->{$ItemID};
+
+        # remove any non ascii word characters
+        $DeplState =~ s{ [^a-zA-Z0-9] }{_}msxg;
+
+        # store the original deployment state as key
+        # and the ss safe coverted deployment state as value
+        $DeplSignals{ $DeploymentStatesList->{$ItemID} } = $DeplState;
+
+        # covert to lower case
+        my $DeplStateColor = lc $Preferences{Color};
+
+        # add to style classes string
+        $StyleClasses .= "
+            .Flag span.$DeplState {
+                background-color: #$DeplStateColor;
+            }
+        ";
+    }
+
+    # wrap into style tags
+    if ($StyleClasses) {
+        $StyleClasses = "<style>$StyleClasses</style>";
+    }
+
     # output version tree header
     if ( $Param{ShowVersions} ) {
         $Self->{LayoutObject}->Block(
@@ -207,6 +256,7 @@ sub Run {
                 %{$VersionHash},
                 Count      => $Counter,
                 InciSignal => $InciSignals{ $VersionHash->{InciStateType} },
+                DeplSignal => $DeplSignals{ $VersionHash->{DeplState} },
                 Active     => $VersionHash->{VersionID} eq $VersionID ? 'Active' : '',
             },
         );
@@ -302,6 +352,7 @@ sub Run {
             %{$LastVersion},
             %{$ConfigItem},
             CurInciSignal => $InciSignals{ $LastVersion->{CurInciStateType} },
+            CurDeplSignal => $DeplSignals{ $LastVersion->{DeplState} },
         },
     );
 
@@ -337,8 +388,8 @@ sub Run {
 
     # Get graph parameters from URI
     my %TraceParams;
-    my @RootCI = ( $ConfigItemID ); 
-    $TraceParams{ConfigItemID} = \@RootCI; 
+    my @RootCI = ( $ConfigItemID );
+    $TraceParams{ConfigItemID} = \@RootCI;
     my @DisplayedCIs;
     if ( $Self->{ParamObject}->GetParam( Param => 'DisplayedCIs' ) ) {
         @DisplayedCIs = split( ',' ,$Self->{ParamObject}->GetParam( Param => 'DisplayedCIs' ) );
@@ -388,7 +439,7 @@ sub Run {
                      Description => 'Regular view',
                  },
             );
-        } 
+        }
     }
 
     # Display digging menu entries
@@ -537,6 +588,8 @@ sub Run {
             %{$LastVersion},
             %{$ConfigItem},
             CurInciSignal => $InciSignals{ $LastVersion->{CurInciStateType} },
+            CurDeplSignal => $DeplSignals{ $LastVersion->{DeplState} },
+            StyleClasses  => $StyleClasses,
         },
     );
 

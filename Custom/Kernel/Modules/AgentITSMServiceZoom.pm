@@ -1,6 +1,6 @@
 # --
 # Kernel/Modules/AgentITSMServiceZoom.pm - the OTRS ITSM Service zoom module
-# Copyright (C) 2001-2014 OTRS AG, http://otrs.com/
+# Copyright (C) 2001-2015 OTRS AG, http://otrs.com/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -274,7 +274,7 @@ sub Run {
     $Self->{LayoutObject}->Block(
          Name => 'GraphLayout',
          Data => {
-             ServiceID 	  => $ServiceID,
+             ServiceID    => $ServiceID,
              DisplayedCIs => $Self->{ParamObject}->GetParam( Param => 'DisplayedCIs' ) || '',
              IA           => $TraceParams{IA},
              Depth        => $MaxTraceDepth,
