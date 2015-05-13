@@ -411,7 +411,7 @@ sub Run {
 
     # Does the agent requested impact analysis?
     if ( $TraceParams{IA} == 1 ) {
-        @LinkTypes = keys $Self->{ConfigObject}->{'ITSM::Core::IncidentLinkTypeDirection'};
+        @LinkTypes = keys %{$Self->{ConfigObject}->{'ITSM::Core::IncidentLinkTypeDirection'}};
         $MaxTraceDepth = 0;
     }
 
