@@ -260,7 +260,7 @@
 [% RenderBlockEnd("GraphMenuItem") %]
 [% RenderBlockStart("GraphLayout") %]
                         <li>
-                            <form title="[% Translate("Change graph layout") %]" action="[% $Env("CGIHandle") %]" method="get">
+                            <form title="[% Translate("Change graph layout") %]" action="[% Env("CGIHandle") %]" method="get">
                                 <input type="hidden" name="Action" value="AgentITSMConfigItemZoom"/>
                                 <input type="hidden" name="ConfigItemID" value="[% Data.ConfigItemID | html %]"/>
                                 <input type="hidden" name="DisplayedCIs" value="[% Data.DisplayedCIs | html %]"/>
