@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <otrs_package version="1.0">
     <Name>OTRSCMDBExplorer</Name>
-    <Version>4.0.2</Version>
+    <Version>4.0.3</Version>
     <Framework>4.0.x</Framework>
     <Vendor>Belnet</Vendor>
     <URL>http://belnet.be</URL>
     <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
+    <ChangeLog Version="4.0.3" Date="2015-05-13 14:07:00">Adapted the Impact Analysis feature for the new ITSM::Core::IncidentLinkTypeDirection SysConfig setting</ChangeLog>
     <ChangeLog Version="4.0.2" Date="2015-05-08 16:35:00">Fixed some typos introduced in version 4.0.1</ChangeLog>
     <ChangeLog Version="4.0.1" Date="2015-05-08 14:26:00">Update for the 4.0 framwork</ChangeLog>
     <ChangeLog Version="3.3.1" Date="2015-01-21 09:45:00">Update for the 3.3 framwork</ChangeLog>
