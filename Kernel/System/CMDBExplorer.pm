@@ -133,16 +133,28 @@ pseudo decomposition link.
 sub GetKnownLinkTypes
 {
     my $Self = shift;
-    return $Self->{KnownLinkTypes} if $Self->{KnownLinkTypes};	# cache-hit
 
-    my %KnownLinkTypes = ( ComposedOf => '+' );	# pseudo, for svc breakdown
+    # Check cache
+    return $Self->{KnownLinkTypes} if $Self->{KnownLinkTypes};
+
+    # Get Config
     my %TypeList = $Self->{LinkObject}->TypeList( UserID => 1 );
-    $KnownLinkTypes{$_} =
-	$TypeList{$_}->{SourceName} eq $TypeList{$_}->{TargetName} ? '=' : '>'
-							   for keys %TypeList;
-    my $IncidentLinkType = $Self->{ConfigObject}->{'ITSM::Core::IncidentLinkType'};
-    $KnownLinkTypes{$IncidentLinkType} = '!' if $KnownLinkTypes{$IncidentLinkType};
-    $Self->{KnownLinkTypes} = \%KnownLinkTypes;		# cache it
+    my $IncidentLinkTypes = $Self->{ConfigObject}->{'ITSM::Core::IncidentLinkTypeDirection'};
+
+    # Create the hash of known link types
+    my %KnownLinkTypes = ( ComposedOf => '+' );	# pseudo, for svc breakdown
+    for ( keys %TypeList ) {
+        if ( $IncidentLinkTypes->{$_} ) {
+            $KnownLinkTypes{$_} = '!';
+        } elsif ( $TypeList{$_}->{SourceName} eq $TypeList{$_}->{TargetName} ) {
+            $KnownLinkTypes{$_} = '=';
+        } else {
+            $KnownLinkTypes{$_} = '>';
+        }
+    }
+
+    # cache result
+    $Self->{KnownLinkTypes} = \%KnownLinkTypes;
 
     return \%KnownLinkTypes;
 }
@@ -218,10 +230,11 @@ sub SetConstraints {
 
     # check and collect params that we can process
     if ( $Param{LinkTypes} ) {
+
 	# check for correct data type / split string-list
-	$Param{LinkTypes} = 
-		$Self->_CheckStringListParam($Param{LinkTypes}, 'LinkTypes');
+	$Param{LinkTypes} = $Self->_CheckStringListParam($Param{LinkTypes}, 'LinkTypes');
 	return unless defined $Param{LinkTypes};	# error, already logged
+
 	# check requested link types against known ones
 	my $KnownLinkTypes = $Self->GetKnownLinkTypes;
 	my %LinkTypes;
@@ -235,12 +248,13 @@ sub SetConstraints {
 			      . join("',\n\t'", sort( keys %$KnownLinkTypes))."'",
 		);
 		return;
-	    } #if
+	    } 
 	    $LinkTypes{$RequestedLinkType}++;
-	} #for
+	} 
+
 	# save HASHref for quick lookup
 	$Self->{LinkTypes} = \%LinkTypes;
-    } #if
+    }
 
     if ( $Param{ObjectTypes} ) {
 	# check for correct data type / split string-list
@@ -505,7 +519,7 @@ sub _followLinks {
 			Level => $Level,
 			LinkType => $LinkType,
 			LinkDir => 'out',
-			LinkDirType => '',
+			LinkDirType => $LinkDirType,
 			Object1 => $Object,
 			Object2 => $TargetObject,
 			Position => $Pos,
@@ -568,7 +582,7 @@ sub _followLinks {
 			Level => $Level,
 			LinkType => $LinkType,
 			LinkDir => 'in',
-			LinkDirType => '',
+			LinkDirType => $LinkDirType,
 			Object1 => $Object,
 			Object2 => $SourceObject,
 			Position => $Pos,

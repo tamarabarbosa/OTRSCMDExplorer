@@ -306,7 +306,7 @@ sub _renderLink {
     $attrs{label} = $Link->{LinkType} if ($Self->{GraphOptions}->{DisplayLinksName});
 
     # Mark links between CI in non-operational state
-    if ( $Link->{LinkType} eq 'DependsOn' ) {
+    if ( $Link->{LinkDirType} eq '!' ) {
         for my $Node ( 'Source', 'Target' ) {
             if ( $Link->{$Node}->GetCurInciState eq 'Incident' ) {
                 $attrs{color} = $InciStateColors{Incident};

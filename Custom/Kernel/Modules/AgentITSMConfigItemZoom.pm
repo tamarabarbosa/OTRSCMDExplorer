@@ -402,19 +402,23 @@ sub Run {
     $TraceParams{Depth} = $Self->{ParamObject}->GetParam( Param => 'Depth' ) || 1;
 
     # Default trace constraints (Show all links up to specified depth)
-    my $LinkTypes = '';
+    my @LinkTypes;
+    my %TypeList = $Self->{LinkObject}->TypeList( UserID => 1 );
+    for ( keys %TypeList ) {
+        push @LinkTypes, $_;
+    }
     my $MaxTraceDepth = $TraceParams{Depth};
 
     # Does the agent requested impact analysis?
     if ( $TraceParams{IA} == 1 ) {
-        $LinkTypes = 'DependsOn';
+        @LinkTypes = keys $Self->{ConfigObject}->{'ITSM::Core::IncidentLinkTypeDirection'};
         $MaxTraceDepth = 0;
     }
 
     # Set Trace constraints
     $Tracer->SetConstraints(
         MaxTraceDepth => $MaxTraceDepth,
-        LinkTypes => $LinkTypes,
+        LinkTypes => \@LinkTypes,
     );
 
     # Display Impact analysis menu entry
